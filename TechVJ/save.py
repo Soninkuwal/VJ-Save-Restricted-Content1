@@ -33,7 +33,7 @@ async def downstatus(client: Client, statusfile, message):
         with open(statusfile, "r") as downread:
             txt = downread.read()
         try:
-            await client.edit_message_text(message.chat.id, message.id, f"Downloaded : {txt}")
+            await client.edit_message_text(message.chat.id, message.id, f"Downloaded : <a href=https://t.me/Sonickuwalupdate>JOIN UPDATED CHANNEL</a> {txt}")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
@@ -50,7 +50,7 @@ async def upstatus(client: Client, statusfile, message):
         with open(statusfile, "r") as upread:
             txt = upread.read()
         try:
-            await client.edit_message_text(message.chat.id, message.id, f"Uploaded : {txt}")
+            await client.edit_message_text(message.chat.id, message.id, f"Uploaded : <a href=https://t.me/Sonickuwalupdate>JOIN UPDATED CHANNEL</a> {txt}")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
@@ -72,7 +72,7 @@ async def send_start(client: Client, message: Message):
         InlineKeyboardButton('🤖 ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ', url='https://t.me/Sonickuwalupdate')
 	]]
     reply_markup = InlineKeyboardMarkup(buttons)
-    await client.send_message(message.chat.id, f"<b>👋 Hi {message.from_user.mention}, I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help</b>", reply_markup=reply_markup, reply_to_message_id=message.id)
+    await client.send_message(message.chat.id, f"<b>👋 Hi {message.from_user.mention}, I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help /n/n <a href=https://t.me/Sonickuwalupdate>JOIN UPDATED CHANNEL</a></b>", reply_markup=reply_markup, reply_to_message_id=message.id)
     return
 
 
