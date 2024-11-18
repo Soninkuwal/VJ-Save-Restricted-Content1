@@ -38,7 +38,7 @@ __note that space in between doesn't matter__
 
 [📌 JOIN UPDATE CHANNEL ⚡]
 👇👇👇👇👇👇👇👇
-<a href=https://t.me/Sonickuwalupdate>JOIN UPDATED CHANNEL</a>"""
+<a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>"""
        
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
