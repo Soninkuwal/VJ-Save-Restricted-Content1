@@ -180,7 +180,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             return 
 
-    smsg = await client.send_message(message.chat.id, '**Downloading : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>**', reply_to_message_id=message.id)
+    smsg = await client.send_message(message.chat.id, '**Downloading**', reply_to_message_id=message.id)
     asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
     try:
         file = await acc.download_media(msg, progress=progress, progress_args=[message,"down"])
