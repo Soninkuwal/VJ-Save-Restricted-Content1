@@ -86,7 +86,7 @@ async def send_help(client: Client, message: Message):
 
 
 @Client.on_message(filters.command("batch"))
-async def batch_link(client: Client, message: message):
+async def batch_link(client: Client, message: Message):
     user_id = message.chat.id    
     lol = await chk_user(message, user_id)
     if lol == 1:
@@ -151,7 +151,7 @@ async def batch_link(client: Client, message: message):
 
 
 @Client.on_message(filters.command("cancel"))
-async def stop_batch(client: Client, message: message):
+async def stop_batch(client: Client, message: Message):
     user_id = message.chat.id
     if user_id in users_loop:
         users_loop[user_id] = False
