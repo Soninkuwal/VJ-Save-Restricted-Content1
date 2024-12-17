@@ -85,80 +85,14 @@ async def send_help(client: Client, message: Message):
     )
 
 
-@Client.on_message(filters.command("batch"))
-async def batch_link(client: Client, message: Message):
-    user_id = message.chat.id    
-    lol = await chk_user(message, user_id)
-    if lol == 1:
-        return    
-        
-    start = await app.ask(message.chat.id, text="Please send the start link.")
-    start_id = start.text
-    s = start_id.split("/")[-1]
-    cs = int(s)
-    
-    last = await app.ask(message.chat.id, text="Please send the end link.")
-    last_id = last.text
-    l = last_id.split("/")[-1]
-    cl = int(l)
-
-    if cl - cs > 100000000:
-        await app.send_message(message.chat.id, "Only 100000000 messages allowed in batch size... Purchase premium to fly 💸")
-        return
-    
-    try:     
-        data = await db.get_data(user_id)
-        
-        if data and data.get("session"):
-            session = data.get("session")
-            try:
-                userbot = Client(":userbot:", api_id=API_ID, api_hash=API_HASH, session_string=session)
-                await userbot.start()                
-            except:
-                return await app.send_message(message.chat.id, "Your login expired ... /login again")
-        else:
-            await app.send_message(message.chat.id, "Login in bot first ...")
-
-        try:
-            users_loop[user_id] = True
-            
-            for i in range(int(s), int(l)):
-                if user_id in users_loop and users_loop[user_id]:
-                    msg = await app.send_message(message.chat.id, "Processing!")
-                    try:
-                        x = start_id.split('/')
-                        y = x[:-1]
-                        result = '/'.join(y)
-                        url = f"{result}/{i}"
-                        link = get_link(url)
-                        await get_msg(userbot, user_id, msg.id, link, 0, message)
-                        sleep_msg = await app.send_message(message.chat.id, "Sleeping for 10 seconds to avoid flood...")
-                        await asyncio.sleep(8)
-                        await sleep_msg.delete()
-                        await asyncio.sleep(2)                                                
-                    except Exception as e:
-                        print(f"Error processing link {url}: {e}")
-                        continue
-                else:
-                    break
-        except Exception as e:
-            await app.send_message(message.chat.id, f"Error: {str(e)}")
-                    
-    except FloodWait as fw:
-        await app.send_message(message.chat.id, f'Try again after {fw.x} seconds due to floodwait from Telegram.')
-    except Exception as e:
-        await app.send_message(message.chat.id, f"Error: {str(e)}")
-
-
-@Client.on_message(filters.command("cancel"))
-async def stop_batch(client: Client, message: Message):
-    user_id = message.chat.id
-    if user_id in users_loop:
-        users_loop[user_id] = False
-        await app.send_message(message.chat.id, "Batch processing stopped.")
-    else:
-        await app.send_message(message.chat.id, "No active batch processing to stop.")
-
+# cancel command
+@Client.on_message(filters.command(["cancel"]))
+async def send_cancel(client: Client, message: Message):
+    batch_temp.IS_BATCH[message.from_user.id] = True
+    await client.send_message(
+        chat_id=message.chat.id, 
+        text="**Batch Successfully Cancelled.**"
+    )
 
 
 @Client.on_message(filters.text & filters.private)
