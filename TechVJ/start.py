@@ -26,7 +26,7 @@ async def downstatus(client, statusfile, message, chat):
         with open(statusfile, "r") as downread:
             txt = downread.read()
         try:
-            await client.edit_message_text(chat, message.id, f"**Downloaded:** **{txt}**")
+            await client.edit_message_text(chat, message.id, f"**Downloaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
@@ -43,7 +43,7 @@ async def upstatus(client, statusfile, message, chat):
         with open(statusfile, "r") as upread:
             txt = upread.read()
         try:
-            await client.edit_message_text(chat, message.id, f"**Uploaded:** **{txt}**")
+            await client.edit_message_text(chat, message.id, f"**Uploaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
@@ -178,7 +178,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             return 
 
-    smsg = await client.send_message(message.chat.id, '**Downloading**', reply_to_message_id=message.id)
+    smsg = await client.send_message(message.chat.id, '**Downloading : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>**', reply_to_message_id=message.id)
     asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
     try:
         file = await acc.download_media(msg, progress=progress, progress_args=[message,"down"])
