@@ -16,5 +16,5 @@ ADMINS = int(os.environ.get("ADMINS", ""))
 DB_URI = os.environ.get("DB_URI", "")
 DB_NAME = os.environ.get("DB_NAME", "")
 
-# If You Want Error Message In Your Personal Message Then Turn It True Else If You Don't Want Then Flase
-ERROR_MESSAGE = bool(os.environ.get('ERROR_MESSAGE', Flase))
+# If You Want Error Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
+ERROR_MESSAGE = bool(os.environ.get('ERROR_MESSAGE', False))
