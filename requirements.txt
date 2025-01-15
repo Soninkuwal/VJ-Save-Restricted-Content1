@@ -5,6 +5,8 @@ motor
 aiofiles
 aiogram
 aiocache
+
+apscheduler
 pyrogram
 
 asyncio
