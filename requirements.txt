@@ -5,6 +5,8 @@ motor
 aiofiles
 aiogram
 aiocache
+pyrogram
+
 asyncio
 
 Flask==1.1.2
