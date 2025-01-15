@@ -1,9 +1,17 @@
 pyrofork==2.3.48
 tgcrypto
-motor
+
 Flask==1.1.2
 gunicorn==20.1.0
 Jinja2==3.0.3
 werkzeug==2.0.2
 itsdangerous==2.0.1
 
+aiohttp==3.8.5
+
+pyrogram==2.0.106
+tgcrypto==1.2.3
+motor==3.1.1
+pillow==10.0.0
+python-dotenv==1.0.0
+asyncio==3.4.3
