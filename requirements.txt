@@ -9,7 +9,6 @@ itsdangerous==2.0.1
 
 pytz
 pyrogram
-tgcrypto
 pyromod
 opencv-python-headless
 requests
