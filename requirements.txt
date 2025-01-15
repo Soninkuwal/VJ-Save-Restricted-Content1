@@ -13,7 +13,6 @@ pyromod
 opencv-python-headless
 requests
 telethon
-telethon
 aiojobs
 werkzeug==2.2.2
 PyPDF2
