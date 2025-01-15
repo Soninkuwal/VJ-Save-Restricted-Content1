@@ -56,16 +56,6 @@ def progress(current, total, message, type):
 
 
 
-@Client.on_message(filters.chat_type.groups | filters.chat_type.channels)
-async def handle_group_channel(client, message):
-    if message.chat.type == "channel":
-        await message.reply("This is a channel message.")
-    elif message.chat.type == "group":
-        await message.reply("This is a group message.")
-
-
-
-
 # start command
 @Client.on_message(filters.command(["start"]))
 async def send_start(client: Client, message: Message):
@@ -80,7 +70,7 @@ async def send_start(client: Client, message: Message):
     reply_markup = InlineKeyboardMarkup(buttons)
     await client.send_message(
         chat_id=message.chat.id, 
-        text=f"<b>👋 Hi {message.from_user.mention}, I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help \n\n for bot any error content :- @SONICKUWALSSCBOT </b>", 
+        text=f"<b>👋 Hi {message.from_user.mention}I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help \n\n for bot any error content :- @SONICKUWALSSCBOT </b>", 
         reply_markup=reply_markup, 
         reply_to_message_id=message.id
     )
