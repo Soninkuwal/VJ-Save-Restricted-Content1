@@ -40,4 +40,9 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user['session']
 
+
+     await db.links.create_index("status")
+     await db.users.create_index("user_id")
+
+
 db = Database(DB_URI, DB_NAME)
