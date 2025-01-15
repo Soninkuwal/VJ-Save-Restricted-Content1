@@ -55,6 +55,17 @@ def progress(current, total, message, type):
         fileup.write(f"{current * 100 / total:.1f}%")
 
 
+
+@Client.on_message(filters.chat_type.groups | filters.chat_type.channels)
+async def handle_group_channel(client, message):
+    if message.chat.type == "channel":
+        await message.reply("This is a channel message.")
+    elif message.chat.type == "group":
+        await message.reply("This is a group message.")
+
+
+
+
 # start command
 @Client.on_message(filters.command(["start"]))
 async def send_start(client: Client, message: Message):
