@@ -283,6 +283,49 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     await client.delete_messages(message.chat.id,[smsg.id])
 
 
+# handle private group & channel working 
+async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
+    try:
+        msg: Message = await acc.get_messages(chatid, msgid)
+        if not msg or msg.empty:
+            return
+        
+        msg_type = get_message_type(msg)
+        if not msg_type:
+            return
+        
+        smsg = await client.send_message(message.chat.id, '**Downloading...**', reply_to_message_id=message.id)
+        asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, message.chat.id))
+        
+        file = await acc.download_media(msg, progress=progress, progress_args=[message, "down"])
+        os.remove(f'{message.id}downstatus.txt')
+        
+        asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, message.chat.id))
+        await send_media(client, message, msg, file, msg_type)
+        
+    except Exception as e:
+        if ERROR_MESSAGE:
+            await client.send_message(message.chat.id, f"Error: {str(e)}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+
+async def send_media(client, message, msg, file, msg_type):
+    try:
+        caption = msg.caption or None
+        if msg_type == "Document":
+            await client.send_document(message.chat.id, file, caption=caption, reply_to_message_id=message.id)
+        elif msg_type == "Video":
+            await client.send_video(message.chat.id, file, caption=caption, reply_to_message_id=message.id)
+        # Add conditions for other types...
+    except Exception as e:
+        if ERROR_MESSAGE:
+            await client.send_message(message.chat.id, f"Error: {str(e)}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+    finally:
+        if os.path.exists(file):
+            os.remove(file)
+
+
+
+
+
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
     try:
