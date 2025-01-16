@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-from pyrogram import Client, filters
+from pyrogram import Client, filters.chat_type
 import os
 import asyncio
 from config import API_ID, API_HASH, BOT_TOKEN
