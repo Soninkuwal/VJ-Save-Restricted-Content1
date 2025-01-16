@@ -164,6 +164,51 @@ async def save(client: Client, message: Message):
         batch_temp.IS_BATCH[message.from_user.id] = True
 
 
+
+
+
+try:
+    acc = Client("saverestricted", session_string=user_data, api_hash=API_HASH, api_id=API_ID)
+    await acc.connect()
+except Exception as e:
+    batch_temp.IS_BATCH[message.from_user.id] = True
+    return await message.reply("**Your login session expired. Please /logout and login again using /login**")
+
+    
+  for attempt in range(3):  # Retry up to 3 times
+    try:
+        file = await acc.download_media(msg, progress=progress, progress_args=[message, "down"])
+        break  # Exit loop if successful
+    except Exception as e:
+        if attempt == 2:  # Final attempt failed
+            if ERROR_MESSAGE:
+                await client.send_message(message.chat.id, f"Download failed: {e}", reply_to_message_id=message.id)
+            return
+
+
+if msg.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+    # Handle group-specific logic here
+    ...
+elif msg.chat.type == enums.ChatType.CHANNEL:
+    # Handle channel-specific logic here
+    ...
+
+
+async def periodic_maintenance():
+    while True:
+        try:
+            # Database cleanup
+            await db.cleanup_inactive_users(inactive_days=30)
+            logging.info("Maintenance completed successfully.")
+        except Exception as e:
+            logging.error(f"Maintenance error: {e}")
+        await asyncio.sleep(3600)  # Run every hour
+asyncio.create_task(periodic_maintenance())
+
+
+
+            
+
 # handle private
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
     msg: Message = await acc.get_messages(chatid, msgid)
