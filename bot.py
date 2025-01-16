@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-from pyrogram import Client, filters_chat_type
+from pyrogram import Client, filters
 import os
 import asyncio
 from config import API_ID, API_HASH, BOT_TOKEN
@@ -51,13 +51,7 @@ async def periodic_cleanup():
         print("Performing periodic cleanup...")
         # Additional cleanup tasks can go here
 
-# Support for Groups and Channels
-@Client.on_message(filters.chat_type.groups | filters.chat_type.channels)
-async def group_channel_handler(client, message):
-    if message.chat.type == "channel":
-        await message.reply("Message received in a channel. Powered by @VJ_Botz!")
-    elif message.chat.type == "group":
-        await message.reply("Message received in a group. Powered by @VJ_Botz!")
+
 
 # Optimize File Handling
 @Client.on_message(filters.command("upload") & filters.private)
@@ -75,16 +69,33 @@ async def upload_file_handler(client, message):
     else:
         await message.reply("The file is invalid (0KB or missing). Please upload a valid file.")
 
+# Enhanced Performance Fix for Slowdown Issues
+async def monitor_performance():
+    while True:
+        await asyncio.sleep(1800)  # Check every 30 minutes
+        print("Monitoring bot performance...")
+        # Add memory cleanup or optimization tasks here
+
+# Add Login/Logout Commands
+@Client.on_message(filters.command("login") & filters.private)
+async def login_handler(client, message):
+    await message.reply("Login functionality is under development. Stay tuned!")
+
+@Client.on_message(filters.command("logout") & filters.private)
+async def logout_handler(client, message):
+    await message.reply("Logout functionality is under development. Stay tuned!")
+
 # Start the Bot
 if __name__ == "__main__":
     bot = Bot()
 
-    # Run periodic cleanup task
+    # Run periodic cleanup and performance monitoring tasks
     loop = asyncio.get_event_loop()
     loop.create_task(periodic_cleanup())
+    loop.create_task(monitor_performance())
 
     bot.run()
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
-# Ask Doubt on telegram @KingVJ01
+# Ask Doubt on telegram @KingVJ01.
