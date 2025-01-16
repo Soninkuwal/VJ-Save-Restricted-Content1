@@ -18,3 +18,9 @@ DB_NAME = os.environ.get("DB_NAME", "")
 
 # If You Want Error Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
 ERROR_MESSAGE = bool(os.environ.get('ERROR_MESSAGE', False))
+
+
+# If You Want group & channel Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
+# Check if the bot is working in a group and channel
+WORKING_GROUP = bool(os.environ.get("WORKING_GROUP", True))
+WORKING_CHANNEL = bool(os.environ.get("WORKING_CHANNEL", True))
