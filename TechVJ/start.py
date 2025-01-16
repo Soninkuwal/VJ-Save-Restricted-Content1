@@ -18,38 +18,48 @@ async def downstatus(client, statusfile, message, chat):
     while True:
         if os.path.exists(statusfile):
             break
-
         await asyncio.sleep(3)
-      
+    
     while os.path.exists(statusfile):
         with open(statusfile, "r") as downread:
             txt = downread.read()
+        
+        # Adding error handling for download status updates
         try:
-            await client.edit_message_text(chat, message.id, f"**Downloaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
+            if txt == '0%':
+                await client.edit_message_text(chat, message.id, "Error: Downloaded file is 0KB. Please try again.")
+            else:
+                await client.edit_message_text(chat, message.id, f"Downloaded: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a> {txt}")
             await asyncio.sleep(10)
-        except:
+        except Exception as e:
+            print(f"Error in downstatus: {e}")
             await asyncio.sleep(5)
 
-
-# upload status
 async def upstatus(client, statusfile, message, chat):
     while True:
         if os.path.exists(statusfile):
             break
-
         await asyncio.sleep(3)      
+    
     while os.path.exists(statusfile):
         with open(statusfile, "r") as upread:
             txt = upread.read()
+        
+        # Adding error handling for upload status updates
         try:
-            await client.edit_message_text(chat, message.id, f"**Uploaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
+            if txt == '0%':
+                await client.edit_message_text(chat, message.id, "Error: Uploaded file is 0KB. Please try again.")
+            else:
+                await client.edit_message_text(chat, message.id, f"Uploaded: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a> {txt}")
             await asyncio.sleep(10)
-        except:
+        except Exception as e:
+            print(f"Error in upstatus: {e}")
             await asyncio.sleep(5)
-
 
 # progress writer
 def progress(current, total, message, type):
+    if total <= 0:
+        return  # Handle 0 or negative total
     with open(f'{message.id}{type}status.txt', "w") as fileup:
         fileup.write(f"{current * 100 / total:.1f}%")
 
