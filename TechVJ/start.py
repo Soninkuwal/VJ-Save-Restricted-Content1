@@ -347,6 +347,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     if batch_temp.IS_BATCH.get(message.from_user.id): return 
     asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, chat))
 
+
     if msg.caption:
         caption = msg.caption
     else:
@@ -427,15 +428,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
         os.remove(file)
     await client.delete_messages(message.chat.id,[smsg.id])
 
-
-
-    # After sending the media, remove the custom thumbnail if it exists
-if ph_path is not None:
-    try:
-        os.remove(ph_path)  # Remove the custom thumbnail
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error removing thumbnail: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
 
 
 
