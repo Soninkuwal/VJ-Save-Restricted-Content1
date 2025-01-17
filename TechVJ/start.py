@@ -475,10 +475,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     await client.delete_messages(message.chat.id,[smsg.id])
 
 
-# Ensure temp thumbnails are removed
-if os.path.exists(THUMBNAIL_PATH):
-    os.remove(THUMBNAIL_PATH)
-
 
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
