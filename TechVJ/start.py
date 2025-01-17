@@ -219,13 +219,7 @@ async def save(client: Client, message: Message):
     
     # Continue processing...
 
-# Example Schema
-users = {
-    "_id": user_id,
-    "custom_caption": "Default Caption",  # To store user's custom captions
-    "replace_words": [],  # List of words to replace
-    "delete_words": []    # List of words to delete
-}
+
 
 @Client.on_message(filters.command(["set_caption"]))
 async def set_caption(client, message):
