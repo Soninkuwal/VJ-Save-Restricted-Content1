@@ -193,6 +193,73 @@ async def auto_forward_media(client: Client, message: Message):
         await message.reply_text(f"Error forwarding your media: {str(e)}")
 
 
+
+def apply_customizations(user_data, text):
+    replace_words = user_data.get("replace_words", [])
+    delete_words = user_data.get("delete_words", [])
+    
+    # Replace words
+    for old_word, new_word in replace_words:
+        text = text.replace(old_word, new_word)
+    
+    # Delete words
+    for word in delete_words:
+        text = text.replace(word, "")
+    
+    return text
+
+@Client.on_message(filters.text & filters.private)
+async def save(client: Client, message: Message):
+    user_data = await db.get_user(message.from_user.id)
+    if user_data:
+        custom_caption = user_data.get("custom_caption", "")
+        if custom_caption:
+            message.text += f"\n\n{custom_caption}"
+        message.text = apply_customizations(user_data, message.text)
+    
+    # Continue processing...
+
+# Example Schema
+users = {
+    "_id": user_id,
+    "custom_caption": "Default Caption",  # To store user's custom captions
+    "replace_words": [],  # List of words to replace
+    "delete_words": []    # List of words to delete
+}
+
+@Client.on_message(filters.command(["set_caption"]))
+async def set_caption(client, message):
+    if len(message.command) < 2:
+        await message.reply("Please provide a caption. Usage: /set_caption Your caption here")
+        return
+    new_caption = " ".join(message.command[1:])
+    await db.update_user(message.from_user.id, {"custom_caption": new_caption})
+    await message.reply(f"Custom caption set to: {new_caption}")
+@Client.on_message(filters.command(["add_replace_word"]))
+async def add_replace_word(client, message):
+    if len(message.command) < 3:
+        await message.reply("Usage: /add_replace_word word_to_replace new_word")
+        return
+    word_to_replace, new_word = message.command[1], message.command[2]
+    user_data = await db.get_user(message.from_user.id)
+    replace_words = user_data.get("replace_words", [])
+    replace_words.append((word_to_replace, new_word))
+    await db.update_user(message.from_user.id, {"replace_words": replace_words})
+    await message.reply(f"Word '{word_to_replace}' will now be replaced with '{new_word}'.")
+
+@Client.on_message(filters.command(["remove_replace_word"]))
+async def remove_replace_word(client, message):
+    if len(message.command) < 2:
+        await message.reply("Usage: /remove_replace_word word_to_replace")
+        return
+    word_to_replace = message.command[1]
+    user_data = await db.get_user(message.from_user.id)
+    replace_words = [w for w in user_data.get("replace_words", []) if w[0] != word_to_replace]
+    await db.update_user(message.from_user.id, {"replace_words": replace_words})
+    await message.reply(f"Word '{word_to_replace}' has been removed from replace list.")
+    
+
+
                    
 
 
@@ -412,6 +479,11 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
         os.remove(f'{message.id}upstatus.txt')
         os.remove(file)
     await client.delete_messages(message.chat.id,[smsg.id])
+
+
+# Ensure temp thumbnails are removed
+if os.path.exists(THUMBNAIL_PATH):
+    os.remove(THUMBNAIL_PATH)
 
 
 # get the type of message
