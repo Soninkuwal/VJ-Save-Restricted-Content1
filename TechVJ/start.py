@@ -429,24 +429,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
-# Replace this with your custom channel ID
-CHANNEL_ID = -1002260543763  # Example channel ID (replace it with your actual channel ID)
-
-@Client.on_message(filters.text)
-async def forward_to_channel(client: Client, message: Message):
-    try:
-        # Forward the message to the custom channel
-        await client.forward_messages(CHANNEL_ID, message.chat.id, message.id)
-        print(f"Message forwarded to channel {CHANNEL_ID}")
-    except Exception as e:
-        print(f"Error forwarding message: {e}")
-
-
-
-
-
-
-
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
     try:
