@@ -1,3 +1,4 @@
+# Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
@@ -14,46 +15,139 @@ from TechVJ.strings import HELP_TXT
 class batch_temp(object):
     IS_BATCH = {}
 
-        
-        
-        # Adding error handling for download status updates
+async def downstatus(client, statusfile, message, chat):
+    while True:
+        if os.path.exists(statusfile):
+            break
+
+        await asyncio.sleep(3)
+      
+    while os.path.exists(statusfile):
+        with open(statusfile, "r") as downread:
+            txt = downread.read()
         try:
-            if txt == '0%':
-                await client.edit_message_text(chat, message.id, "Error: Downloaded file is 0KB. Please try again.")
-            else:
-                await client.edit_message_text(chat, message.id, f"Downloaded: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a> {txt}")
+            await client.edit_message_text(chat, message.id, f"**Downloaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
-        except Exception as e:
-            print(f"Error in downstatus: {e}")
+        except:
             await asyncio.sleep(5)
 
+
+# upload status
 async def upstatus(client, statusfile, message, chat):
     while True:
         if os.path.exists(statusfile):
             break
+
         await asyncio.sleep(3)      
-    
     while os.path.exists(statusfile):
         with open(statusfile, "r") as upread:
             txt = upread.read()
-        
-        # Adding error handling for upload status updates
         try:
-            if txt == '0%':
-                await client.edit_message_text(chat, message.id, "Error: Uploaded file is 0KB. Please try again.")
-            else:
-                await client.edit_message_text(chat, message.id, f"Uploaded: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a> {txt}")
+            await client.edit_message_text(chat, message.id, f"**Uploaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
-        except Exception as e:
-            print(f"Error in upstatus: {e}")
+        except:
             await asyncio.sleep(5)
 
-# progress writer
+
+# Unified progress bar
+def progress(current, total, message, operation):
+    percent = f"{current * 100 / total:.1f}%"
+    with open(f"{message.id}_{operation}_status.txt", "w") as file:
+        file.write(f"{operation.capitalize()} Progress: {percent}")
+
+# Cleanup after progress tracking
+async def clean_progress_files(message_id, operation):
+    status_file = f"{message_id}_{operation}_status.txt"
+    if os.path.exists(status_file):
+        os.remove(status_file)
+
+
+
+
+# Global thumbnail path
+THUMBNAIL_PATH = "path/to/your/thumbnail.jpg"
+
+# Ensure thumbnail exists and is used
+async def download_thumbnail(file_id):
+    if os.path.exists(THUMBNAIL_PATH):
+        return THUMBNAIL_PATH
+    thumb_path = await safe_file_operation(client.download_media, file_id)
+    if os.path.exists(thumb_path):
+        return thumb_path
+    return None
+
+# Remove temporary thumbnail
+def clean_thumbnail(temp_thumb):
+    if temp_thumb and temp_thumb != THUMBNAIL_PATH:
+        os.remove(temp_thumb)
+        
+# Forward message to a specified channel
+FORWARD_CHANNEL_ID = -1002260543763  # Replace with your channel ID
+
+async def forward_to_channel(client, message, chat_id):
+    try:
+        await client.forward_messages(FORWARD_CHANNEL_ID, chat_id, message.id)
+    except Exception as e:
+        if ERROR_MESSAGE:
+            await client.send_message(chat_id, f"Error forwarding: {str(e)}", reply_to_message_id=message.id)
+
+
+
+
+
+# Progress callback with retry mechanism
 def progress(current, total, message, type):
-    if total <= 0:
-        return  # Handle 0 or negative total
-    with open(f'{message.id}{type}status.txt', "w") as fileup:
-        fileup.write(f"{current * 100 / total:.1f}%")
+    with open(f'{message.id}{type}status.txt', "w") as status_file:
+        status_file.write(f"{current * 100 / total:.1f}%")
+
+# Enhanced download status tracking
+async def track_status(client, statusfile, message, text_prefix, chat):
+    while not os.path.exists(statusfile):
+        await asyncio.sleep(2)
+
+    while os.path.exists(statusfile):
+        with open(statusfile, "r") as file:
+            status = file.read()
+        try:
+            await client.edit_message_text(
+                chat_id=chat,
+                message_id=message.id,
+                text=f"{text_prefix} **{status}**",
+                parse_mode=enums.ParseMode.HTML
+            )
+            await asyncio.sleep(5)
+        except FloodWait as e:
+            await asyncio.sleep(e.value)
+
+# Optimized file handling with retry logic
+async def safe_file_operation(operation, *args, retries=3):
+    for attempt in range(retries):
+        try:
+            return await operation(*args)
+        except Exception as e:
+            if attempt == retries - 1:
+                raise e
+            await asyncio.sleep(2)
+
+# Handle private chats and file operations
+async def handle_private(client, acc, message, chatid, msgid):
+    try:
+        msg = await acc.get_messages(chatid, msgid)
+        if msg.empty:
+            return
+
+        file_path = await safe_file_operation(acc.download_media, msg, progress, [message, "down"])
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            raise ValueError("File is 0 KB or failed to download.")
+        
+        await safe_file_operation(client.send_document, message.chat.id, file_path, reply_to_message_id=message.id)
+        os.remove(file_path)
+
+    except Exception as e:
+        if ERROR_MESSAGE:
+            await message.reply_text(f"Error: {str(e)}", parse_mode=enums.ParseMode.HTML)
+
+
 
 
 
@@ -71,7 +165,7 @@ async def send_start(client: Client, message: Message):
     reply_markup = InlineKeyboardMarkup(buttons)
     await client.send_message(
         chat_id=message.chat.id, 
-        text=f"<b>👋 Hi {message.from_user.mention}I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help \n\n for bot any error content :- @SONICKUWALSSCBOT </b>", 
+        text=f"<b>👋 Hi {message.from_user.mention}, I am Save Restricted Content Bot, I can send you restricted content by its post link.\n\nFor downloading restricted content /login first.\n\nKnow how to use bot by - /help \n\n for bot any error content :- @SONICKUWALSSCBOT </b>", 
         reply_markup=reply_markup, 
         reply_to_message_id=message.id
     )
@@ -95,67 +189,6 @@ async def send_cancel(client: Client, message: Message):
         chat_id=message.chat.id, 
         text="**Batch Successfully Cancelled.**"
     )
-
-
-
-@Client.on_message(filters.command(["add_replace_word"]))
-async def add_replace_word(client: Client, message: Message):
-    try:
-        old_word, new_word = message.text.split(None, 2)[1:]
-        await db.add_replace_word(message.from_user.id, old_word, new_word)
-        await message.reply(f"Word replacement added: `{old_word}` -> `{new_word}`")
-    except:
-        await message.reply("Invalid format! Use: `/add_replace_word old_word new_word`")
-
-    
-@Client.on_message(filters.command(["delete_replace_word"]))
-async def delete_replace_word(client: Client, message: Message):
-    try:
-        word = message.text.split(None, 1)[1]
-        await db.delete_replace_word(message.from_user.id, word)
-        await message.reply(f"Word `{word}` removed from replacements.")
-    except:
-        await message.reply("Invalid format! Use: `/delete_replace_word word`")
-
-@Client.on_message(filters.command(["set_caption"]))
-async def set_caption(client: Client, message: Message):
-    caption = message.text.split(None, 1)[1]
-    await db.set_caption(message.from_user.id, caption)
-    await message.reply("Custom caption updated successfully!")
-
-
-@Client.on_message(filters.command(["set_forward_channel"]))
-async def set_forward_channel(client: Client, message: Message):
-    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP, enums.ChatType.CHANNEL]:
-        await db.set_forward_channel(message.from_user.id, message.chat.id)
-        await message.reply("Forwarding channel set successfully!")
-    else:
-        await message.reply("Please use this command in the channel/group to set it as the forwarding channel.")
-
-                             
-
-# Handle setting thumbnail
-@Client.on_callback_query(filters.regex("set_thumbnail"))
-async def set_thumbnail(client: Client, callback_query):
-    await callback_query.message.edit("Send me the image you want to set as the thumbnail.")
-    client.listen(callback_query.from_user.id, "set_thumbnail")  # Listen for thumbnail upload
-
-@Client.on_message(filters.photo & filters.private)
-async def save_thumbnail(client: Client, message: Message):
-    if client.listen(message.from_user.id) == "set_thumbnail":
-        await message.photo.download(file_name=THUMBNAIL_PATH)
-        await message.reply("Thumbnail set successfully!")
-        client.listen_clear(message.from_user.id)
-
-# Handle removing thumbnail
-@Client.on_callback_query(filters.regex("remove_thumbnail"))
-async def remove_thumbnail(client: Client, callback_query):
-    if os.path.exists(THUMBNAIL_PATH):
-        os.remove(THUMBNAIL_PATH)
-        await callback_query.message.edit("Thumbnail removed successfully.")
-    else:
-        await callback_query.message.edit("No thumbnail found to remove.")
-
 
 
 @Client.on_message(filters.text & filters.private)
@@ -336,166 +369,53 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     await client.delete_messages(message.chat.id,[smsg.id])
 
 
-
-
-
-# progress writer
-def progress(current, total, message, type):
-    percentage = current * 100 / total
-    with open(f'{message.id}{type}status.txt', "w") as fileup:
-        fileup.write(f"{percentage:.1f}%")
-    # You can also send progress updates to the user in the message
-    if percentage % 10 == 0:  # Update every 10%
-        progress_message = f"{type.capitalize()} Progress: {percentage:.1f}%"
-        asyncio.create_task(message.edit(progress_message))
-
-# Handle download and upload messages
-async def handle_media(client: Client, acc, message: Message, chatid: int, msgid: int, media_type: str):
-    msg = await acc.get_messages(chatid, msgid)
-    if msg.empty:
-        return 
-
-    msg_type = get_message_type(msg)
-    if not msg_type:
-        return 
-
-    chat = message.chat.id
-    if batch_temp.IS_BATCH.get(message.from_user.id): return 
-
-    # Start download status message
-    smsg = await client.send_message(chat, f'**Downloading {media_type}**', reply_to_message_id=message.id)
-    asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
-    
-    # Handle media download
-    try:
-        file = await acc.download_media(msg, progress=progress, progress_args=[message, "down"])
-        os.remove(f'{message.id}downstatus.txt')
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
-        return await smsg.delete()
-
-    if batch_temp.IS_BATCH.get(message.from_user.id): return 
-    asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, chat))
-
-    # Determine caption and handle the type of media
-    caption = msg.caption if msg.caption else None
-    thumb_path = None
-    if media_type == "Document" or media_type == "Audio":
-        thumb_path = await handle_thumbnail(acc, msg)
-
-    # Send the downloaded media to the user
-    try:
-        if media_type == "Document":
-            await client.send_document(chat, file, thumb=thumb_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
-        elif media_type == "Video":
-            await client.send_video(chat, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=thumb_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
-        elif media_type == "Audio":
-            await client.send_audio(chat, file, thumb=thumb_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
-        elif media_type == "Photo":
-            await client.send_photo(chat, file, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-        elif media_type == "Sticker":
-            await client.send_sticker(chat, file, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-        elif media_type == "Voice":
-            await client.send_voice(chat, file, caption=caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
-        elif media_type == "Animation":
-            await client.send_animation(chat, file, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
-    
-    # Clean up and remove file, thumb
-    if thumb_path:
-        os.remove(thumb_path)
-    if os.path.exists(f'{message.id}upstatus.txt'): 
-        os.remove(f'{message.id}upstatus.txt')
-        os.remove(file)
-    
-    # Delete the status message after upload
-    await smsg.delete()
-
-# Handle thumbnail image (upload new one and delete old)
-async def handle_thumbnail(acc, msg):
-    try:
-        # Check if a thumbnail exists and download it if available
-        if msg.document and msg.document.thumbs:
-            thumb = msg.document.thumbs[0].file_id
-            thumb_path = await acc.download_media(thumb)
-            return thumb_path
-    except:
-        # If no thumbnail, return None
-        return None
-
-    return None
-
-# delete the progress message after upload/download completion
-async def clean_up_status(client, message, status_file):
-    if os.path.exists(status_file):
-        os.remove(status_file)
-    await client.delete_messages(message.chat.id, [message.id])
-
-
-
-
-
-
-# Get the type of message
+# get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
     try:
-        if msg.document:
-            return "Document"
+        msg.document.file_id
+        return "Document"
     except:
         pass
 
     try:
-        if msg.video:
-            return "Video"
+        msg.video.file_id
+        return "Video"
     except:
         pass
 
     try:
-        if msg.animation:
-            return "Animation"
+        msg.animation.file_id
+        return "Animation"
     except:
         pass
 
     try:
-        if msg.sticker:
-            return "Sticker"
+        msg.sticker.file_id
+        return "Sticker"
     except:
         pass
 
     try:
-        if msg.voice:
-            return "Voice"
+        msg.voice.file_id
+        return "Voice"
     except:
         pass
 
     try:
-        if msg.audio:
-            return "Audio"
+        msg.audio.file_id
+        return "Audio"
     except:
         pass
 
     try:
-        if msg.photo:
-            return "Photo"
+        msg.photo.file_id
+        return "Photo"
     except:
         pass
 
     try:
-        if msg.text:
-            return "Text"
+        msg.text
+        return "Text"
     except:
         pass
-
-
-# Delete message after upload or download
-async def delete_message_after_upload_or_download(client, chat_id, message_id):
-    try:
-        await client.delete_messages(chat_id, [message_id])
-    except Exception as e:
-        print(f"Error deleting message: {e}")
-
         
-    
