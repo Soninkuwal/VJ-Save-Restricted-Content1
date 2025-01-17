@@ -429,6 +429,17 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
+    # After sending the media, remove the custom thumbnail if it exists
+if ph_path is not None:
+    try:
+        os.remove(ph_path)  # Remove the custom thumbnail
+    except Exception as e:
+        if ERROR_MESSAGE:
+            await client.send_message(message.chat.id, f"Error removing thumbnail: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+
+
+
+
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
     try:
