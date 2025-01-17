@@ -12,6 +12,8 @@ from config import API_ID, API_HASH, ERROR_MESSAGE
 from database.db import db
 from TechVJ.strings import HELP_TXT
 
+import tempfile
+
 class batch_temp(object):
     IS_BATCH = {}
 
@@ -64,35 +66,30 @@ async def clean_progress_files(message_id, operation):
 
 
 
-# Global thumbnail path
-THUMBNAIL_PATH = "path/to/your/thumbnail.jpg"
+# Permanent thumbnail management
+async def set_thumbnail(client: Client, message: Message):
+    if not message.document:
+        return await message.reply_text("Please reply to a valid image to set as thumbnail.")
+    thumb_path = await safe_file_operation(client.download_media, message.document)
+    global THUMBNAIL_PATH
+    THUMBNAIL_PATH = thumb_path
+    await message.reply_text("Thumbnail updated successfully!")
 
-# Ensure thumbnail exists and is used
-async def download_thumbnail(file_id):
+
+# Optimized slow speed handling with semaphore
+semaphore = asyncio.Semaphore(3)
+
+# Command to remove global thumbnail
+@Client.on_message(filters.command(["remove_thumbnail"]))
+async def remove_thumbnail(client, message):
+    global THUMBNAIL_PATH
     if os.path.exists(THUMBNAIL_PATH):
-        return THUMBNAIL_PATH
-    thumb_path = await safe_file_operation(client.download_media, file_id)
-    if os.path.exists(thumb_path):
-        return thumb_path
-    return None
-
-# Remove temporary thumbnail
-def clean_thumbnail(temp_thumb):
-    if temp_thumb and temp_thumb != THUMBNAIL_PATH:
-        os.remove(temp_thumb)
+        os.remove(THUMBNAIL_PATH)
+        THUMBNAIL_PATH = None
+        await message.reply_text("Thumbnail removed successfully!")
+    else:
+        await message.reply_text("No thumbnail set.")
         
-# Forward message to a specified channel
-FORWARD_CHANNEL_ID = -1002260543763  # Replace with your channel ID
-
-async def forward_to_channel(client, message, chat_id):
-    try:
-        await client.forward_messages(FORWARD_CHANNEL_ID, chat_id, message.id)
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(chat_id, f"Error forwarding: {str(e)}", reply_to_message_id=message.id)
-
-
-
 
 
 # Progress callback with retry mechanism
@@ -149,6 +146,54 @@ async def handle_private(client, acc, message, chatid, msgid):
 
 
 
+
+
+# Define the channel where messages should be forwarded
+FORWARD_CHANNEL_ID = -1002260543763  # Replace with your target channel ID
+
+@Client.on_message(filters.private & filters.text)
+async def auto_forward(client: Client, message: Message):
+    """
+    Automatically forward messages received in private chats to a predefined channel.
+    """
+    try:
+        # Forward the incoming message to the target channel
+        forwarded_message = await client.forward_messages(
+            chat_id=FORWARD_CHANNEL_ID,
+            from_chat_id=message.chat.id,
+            message_ids=message.id
+        )
+
+        # Optionally, notify the user about the successful forwarding
+        await message.reply_text("Your message has been forwarded successfully!")
+    
+    except Exception as e:
+        # Log the error or notify the user
+        await message.reply_text(f"Error forwarding your message: {str(e)}")
+
+# Hook for other message types (e.g., media, documents, etc.)
+@Client.on_message(filters.private & ~filters.text)
+async def auto_forward_media(client: Client, message: Message):
+    """
+    Automatically forward media messages to the predefined channel.
+    """
+    try:
+        # Forward media or non-text messages
+        forwarded_message = await client.forward_messages(
+            chat_id=FORWARD_CHANNEL_ID,
+            from_chat_id=message.chat.id,
+            message_ids=message.id
+        )
+
+        # Notify user of successful forwarding
+        await message.reply_text("Your media has been forwarded successfully!")
+
+    except Exception as e:
+        # Handle errors gracefully
+        await message.reply_text(f"Error forwarding your media: {str(e)}")
+
+
+                   
 
 
 # start command
