@@ -14,6 +14,16 @@ from TechVJ.strings import HELP_TXT
 class batch_temp(object):
     IS_BATCH = {}
 
+THUMBNAIL_PATH = "thumbnail.jpg"  # Path to store the permanent thumbnail image
+
+# Progress function with real-time updates
+def progress(current, total, message, type):
+    percent = f"{current * 100 / total:.1f}%"
+    with open(f'{message.id}{type}status.txt', "w") as fileup:
+        fileup.write(percent)
+
+
+
 async def downstatus(client, statusfile, message, chat):
     while True:
         if os.path.exists(statusfile):
@@ -140,8 +150,29 @@ async def set_forward_channel(client: Client, message: Message):
     else:
         await message.reply("Please use this command in the channel/group to set it as the forwarding channel.")
 
+                             
 
+# Handle setting thumbnail
+@Client.on_callback_query(filters.regex("set_thumbnail"))
+async def set_thumbnail(client: Client, callback_query):
+    await callback_query.message.edit("Send me the image you want to set as the thumbnail.")
+    client.listen(callback_query.from_user.id, "set_thumbnail")  # Listen for thumbnail upload
 
+@Client.on_message(filters.photo & filters.private)
+async def save_thumbnail(client: Client, message: Message):
+    if client.listen(message.from_user.id) == "set_thumbnail":
+        await message.photo.download(file_name=THUMBNAIL_PATH)
+        await message.reply("Thumbnail set successfully!")
+        client.listen_clear(message.from_user.id)
+
+# Handle removing thumbnail
+@Client.on_callback_query(filters.regex("remove_thumbnail"))
+async def remove_thumbnail(client: Client, callback_query):
+    if os.path.exists(THUMBNAIL_PATH):
+        os.remove(THUMBNAIL_PATH)
+        await callback_query.message.edit("Thumbnail removed successfully.")
+    else:
+        await callback_query.message.edit("No thumbnail found to remove.")
 
 
 
@@ -325,33 +356,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
-# Thumbnail Handler
-async def set_thumbnail(client, message: Message):
-    user_id = message.from_user.id
-    if not message.photo:
-        await message.reply_text("Please reply to an image to set it as a thumbnail!")
-        return
-
-    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
-    os.makedirs("thumbnails", exist_ok=True)
-
-    # Save the thumbnail
-    await client.download_media(message.photo, file_name=thumbnail_path)
-    await message.reply_text("Thumbnail successfully updated!")
-
-@Client.on_message(filters.command(["set_thumbnail"]))
-async def set_thumbnail_command(client: Client, message: Message):
-    await set_thumbnail(client, message)
-
-# Automatically remove existing thumbnails after use
-def remove_thumbnail(user_id):
-    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
-    if os.path.exists(thumbnail_path):
-        os.remove(thumbnail_path)
-
-def get_thumbnail(user_id):
-    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
-    return thumbnail_path if os.path.exists(thumbnail_path) else None
 
 # Auto-delete download/upload progress messages
 async def auto_delete_message(client, chat_id, message_id, delay=5):
@@ -381,36 +385,52 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             await client.send_message(chat, f"Error: {e}", reply_to_message_id=message.id)
         return await smsg.delete()
 
-    # Handle Thumbnail
-    thumbnail = get_thumbnail(user_id)
+                                      
 
-    # Start Upload
-    smsg = await client.send_message(chat, '**Uploading...**', reply_to_message_id=message.id)
+    
+ # Media upload with thumbnail support
+async def upload_media(client, chat_id, media, message, caption=None):
+    smsg = await client.send_message(chat_id, "Uploading...", reply_to_message_id=message.id)
     try:
-        if msg_type == "Document":
-            await client.send_document(chat, file, thumb=thumbnail, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "Photo":
-            await client.send_photo(chat, file, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "Video":
-            await client.send_video(chat, file, thumb=thumbnail, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "text":
-            await client.send_text(chat, file, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "animation":
-            await client.send_animation(chat, file, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "sticker":
-            await client.send_sticker(chat, file, caption=msg.caption, reply_to_message_id=message.id)
-        elif msg_type == "voice":
-            await client.send_voice(chat, file, caption=msg.caption, reply_to_message_id=message.id)
-        
-        # Add other media types if needed
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(chat, f"Error: {e}", reply_to_message_id=message.id)
+        if hasattr(media, "video"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_video(chat_id, media.video.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "document"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_document(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "animation"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_animation(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "sticker"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_sticker(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "text"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_text(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "massage"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_massage(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+            
+        elif hasattr(media, "voice"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_voice(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        elif hasattr(media, "photo"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_photo(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+            
+        elif hasattr(media, "audio"):
+            thumb = THUMBNAIL_PATH if os.path.exists(THUMBNAIL_PATH) else None
+            await client.send_audio(chat_id, media.document.file_id, caption=caption, thumb=thumb, progress=progress, progress_args=[message, "upload"])
+        else:
+            await client.send_message(chat_id, "Unsupported media type.")
+    finally:
+        await client.delete_messages(chat_id, [smsg.id])  # Clean up the upload message
 
-    # Cleanup
-    remove_thumbnail(user_id)
-    os.remove(file)
-    await auto_delete_message(client, chat, smsg.id, delay=5)
+# Auto-remove temporary files
+async def cleanup_temp_files(file_paths):
+    for file_path in file_paths:
+        if os.path.exists(file_path):
+            os.remove(file_path)
                                           
    
         
