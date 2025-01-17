@@ -283,45 +283,130 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     await client.delete_messages(message.chat.id,[smsg.id])
 
 
-# handle private group & channel working 
+
+
+# Thumbnail Handler
+async def set_thumbnail(client, message: Message):
+    user_id = message.from_user.id
+    if not message.photo:
+        await message.reply_text("Please reply to an image to set it as a thumbnail!")
+        return
+
+    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
+    os.makedirs("thumbnails", exist_ok=True)
+
+    # Save the thumbnail
+    await client.download_media(message.photo, file_name=thumbnail_path)
+    await message.reply_text("Thumbnail successfully updated!")
+
+@Client.on_message(filters.command(["set_thumbnail"]))
+async def set_thumbnail_command(client: Client, message: Message):
+    await set_thumbnail(client, message)
+
+# Automatically remove existing thumbnails after use
+def remove_thumbnail(user_id):
+    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
+    if os.path.exists(thumbnail_path):
+        os.remove(thumbnail_path)
+
+def get_thumbnail(user_id):
+    thumbnail_path = f"thumbnails/{user_id}_thumb.jpg"
+    return thumbnail_path if os.path.exists(thumbnail_path) else None
+
+# Auto-delete download/upload progress messages
+async def auto_delete_message(client, chat_id, message_id, delay=5):
+    await asyncio.sleep(delay)
+    await client.delete_messages(chat_id, message_id)
+
+# Adjust the `handle_private` function to implement changes
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
+    msg: Message = await acc.get_messages(chatid, msgid)
+    if msg.empty:
+        return
+
+    msg_type = get_message_type(msg)
+    if not msg_type:
+        return
+
+    chat = message.chat.id
+    user_id = message.from_user.id
+    smsg = await client.send_message(message.chat.id, '**Downloading...**', reply_to_message_id=message.id)
+
+    # Start download
     try:
-        msg: Message = await acc.get_messages(chatid, msgid)
-        if not msg or msg.empty:
-            return
-        
-        msg_type = get_message_type(msg)
-        if not msg_type:
-            return
-        
-        smsg = await client.send_message(message.chat.id, '**Downloading...**', reply_to_message_id=message.id)
-        asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, message.chat.id))
-        
         file = await acc.download_media(msg, progress=progress, progress_args=[message, "down"])
         os.remove(f'{message.id}downstatus.txt')
-        
-        asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, message.chat.id))
-        await send_media(client, message, msg, file, msg_type)
-        
     except Exception as e:
         if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error: {str(e)}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+            await client.send_message(chat, f"Error: {e}", reply_to_message_id=message.id)
+        return await smsg.delete()
 
-async def send_media(client, message, msg, file, msg_type):
+    # Handle Thumbnail
+    thumbnail = get_thumbnail(user_id)
+
+    # Start Upload
+    smsg = await client.send_message(chat, '**Uploading...**', reply_to_message_id=message.id)
     try:
-        caption = msg.caption or None
         if msg_type == "Document":
-            await client.send_document(message.chat.id, file, caption=caption, reply_to_message_id=message.id)
+            await client.send_document(chat, file, thumb=thumbnail, caption=msg.caption, reply_to_message_id=message.id)
+        elif msg_type == "Photo":
+            await client.send_photo(chat, file, caption=msg.caption, reply_to_message_id=message.id)
         elif msg_type == "Video":
-            await client.send_video(message.chat.id, file, caption=caption, reply_to_message_id=message.id)
-        # Add conditions for other types...
+            await client.send_video(chat, file, thumb=thumbnail, caption=msg.caption, reply_to_message_id=message.id)
+        elif msg_type == "text":
+            await client.send_text(chat, file, caption=msg.caption, reply_to_message_id=message.id)
+        elif msg_type == "animation":
+            await client.send_animation(chat, file, caption=msg.caption, reply_to_message_id=message.id)
+        elif msg_type == "sticker":
+            await client.send_sticker(chat, file, caption=msg.caption, reply_to_message_id=message.id)
+        elif msg_type == "voice":
+            await client.send_voice(chat, file, caption=msg.caption, reply_to_message_id=message.id)
+        
+        # Add other media types if needed
     except Exception as e:
         if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error: {str(e)}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-    finally:
-        if os.path.exists(file):
-            os.remove(file)
+            await client.send_message(chat, f"Error: {e}", reply_to_message_id=message.id)
 
+    # Cleanup
+    remove_thumbnail(user_id)
+    os.remove(file)
+    await auto_delete_message(client, chat, smsg.id, delay=5)
+                                          
+    
+@Client.on_message(filters.command(["add_replace_word"]))
+async def add_replace_word(client: Client, message: Message):
+    try:
+        old_word, new_word = message.text.split(None, 2)[1:]
+        await db.add_replace_word(message.from_user.id, old_word, new_word)
+        await message.reply(f"Word replacement added: `{old_word}` -> `{new_word}`")
+    except:
+        await message.reply("Invalid format! Use: `/add_replace_word old_word new_word`")
+
+    
+ @Client.on_message(filters.command(["delete_replace_word"]))
+async def delete_replace_word(client: Client, message: Message):
+    try:
+        word = message.text.split(None, 1)[1]
+        await db.delete_replace_word(message.from_user.id, word)
+        await message.reply(f"Word `{word}` removed from replacements.")
+    except:
+        await message.reply("Invalid format! Use: `/delete_replace_word word`")
+
+@Client.on_message(filters.command(["set_caption"]))
+async def set_caption(client: Client, message: Message):
+    caption = message.text.split(None, 1)[1]
+    await db.set_caption(message.from_user.id, caption)
+    await message.reply("Custom caption updated successfully!")
+
+
+@Client.on_message(filters.command(["set_forward_channel"]))
+async def set_forward_channel(client: Client, message: Message):
+    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP, enums.ChatType.CHANNEL]:
+        await db.set_forward_channel(message.from_user.id, message.chat.id)
+        await message.reply("Forwarding channel set successfully!")
+    else:
+        await message.reply("Please use this command in the channel/group to set it as the forwarding channel.")
+        
 
 
 
