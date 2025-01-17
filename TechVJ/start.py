@@ -105,6 +105,46 @@ async def send_cancel(client: Client, message: Message):
     )
 
 
+
+@Client.on_message(filters.command(["add_replace_word"]))
+async def add_replace_word(client: Client, message: Message):
+    try:
+        old_word, new_word = message.text.split(None, 2)[1:]
+        await db.add_replace_word(message.from_user.id, old_word, new_word)
+        await message.reply(f"Word replacement added: `{old_word}` -> `{new_word}`")
+    except:
+        await message.reply("Invalid format! Use: `/add_replace_word old_word new_word`")
+
+    
+@Client.on_message(filters.command(["delete_replace_word"]))
+async def delete_replace_word(client: Client, message: Message):
+    try:
+        word = message.text.split(None, 1)[1]
+        await db.delete_replace_word(message.from_user.id, word)
+        await message.reply(f"Word `{word}` removed from replacements.")
+    except:
+        await message.reply("Invalid format! Use: `/delete_replace_word word`")
+
+@Client.on_message(filters.command(["set_caption"]))
+async def set_caption(client: Client, message: Message):
+    caption = message.text.split(None, 1)[1]
+    await db.set_caption(message.from_user.id, caption)
+    await message.reply("Custom caption updated successfully!")
+
+
+@Client.on_message(filters.command(["set_forward_channel"]))
+async def set_forward_channel(client: Client, message: Message):
+    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP, enums.ChatType.CHANNEL]:
+        await db.set_forward_channel(message.from_user.id, message.chat.id)
+        await message.reply("Forwarding channel set successfully!")
+    else:
+        await message.reply("Please use this command in the channel/group to set it as the forwarding channel.")
+
+
+
+
+
+
 @Client.on_message(filters.text & filters.private)
 async def save(client: Client, message: Message):
     if "https://t.me/" in message.text:
@@ -372,44 +412,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     os.remove(file)
     await auto_delete_message(client, chat, smsg.id, delay=5)
                                           
-    
-@Client.on_message(filters.command(["add_replace_word"]))
-async def add_replace_word(client: Client, message: Message):
-    try:
-        old_word, new_word = message.text.split(None, 2)[1:]
-        await db.add_replace_word(message.from_user.id, old_word, new_word)
-        await message.reply(f"Word replacement added: `{old_word}` -> `{new_word}`")
-    except:
-        await message.reply("Invalid format! Use: `/add_replace_word old_word new_word`")
-
-    
- @Client.on_message(filters.command(["delete_replace_word"]))
-async def delete_replace_word(client: Client, message: Message):
-    try:
-        word = message.text.split(None, 1)[1]
-        await db.delete_replace_word(message.from_user.id, word)
-        await message.reply(f"Word `{word}` removed from replacements.")
-    except:
-        await message.reply("Invalid format! Use: `/delete_replace_word word`")
-
-@Client.on_message(filters.command(["set_caption"]))
-async def set_caption(client: Client, message: Message):
-    caption = message.text.split(None, 1)[1]
-    await db.set_caption(message.from_user.id, caption)
-    await message.reply("Custom caption updated successfully!")
-
-
-@Client.on_message(filters.command(["set_forward_channel"]))
-async def set_forward_channel(client: Client, message: Message):
-    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP, enums.ChatType.CHANNEL]:
-        await db.set_forward_channel(message.from_user.id, message.chat.id)
-        await message.reply("Forwarding channel set successfully!")
-    else:
-        await message.reply("Please use this command in the channel/group to set it as the forwarding channel.")
+   
         
-
-
-
 
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
