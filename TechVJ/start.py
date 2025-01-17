@@ -405,35 +405,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
-
-
-@Client.on_message(filters.text & filters.private)
-async def save(client: Client, message: Message):
-    user_data = await db.get_user(message.from_user.id)
-    if user_data:
-        custom_caption = user_data.get("custom_caption", "")
-        if custom_caption:
-            message.text += f"\n\n{custom_caption}"
-        message.text = apply_customizations(user_data, message.text)
-    
-    # Continue processing...
-def apply_customizations(user_data, text):
-    replace_words = user_data.get("replace_words", [])
-    delete_words = user_data.get("delete_words", [])
-    
-    # Replace words
-    for old_word, new_word in replace_words:
-        text = text.replace(old_word, new_word)
-    
-    # Delete words
-    for word in delete_words:
-        text = text.replace(word, "")
-    
-    return text
-
-
-
-
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
     try:
