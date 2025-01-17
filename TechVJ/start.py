@@ -429,19 +429,19 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
+# Replace this with your custom channel ID
+CHANNEL_ID = -1002260543763  # Example channel ID (replace it with your actual channel ID)
 
-# Specify your custom channel ID here
-CUSTOM_CHANNEL_ID = "-1002260543763"
-
-@Client.on_message(filters.text | filters.photo | filters.video | filters.audio | filters.document | filters.animation | filters.sticker | filters.voice)
+@Client.on_message(filters.text)
 async def forward_to_channel(client: Client, message: Message):
-    # Forward every message to the custom channel
     try:
-        await client.forward_messages(chat_id=CUSTOM_CHANNEL_ID, from_chat_id=message.chat.id, message_ids=message.message_id)
+        # Forward the message to the custom channel
+        await client.forward_messages(CHANNEL_ID, message.chat.id, message.id)
+        print(f"Message forwarded to channel {CHANNEL_ID}")
     except Exception as e:
-        # Handle exceptions (e.g., if the bot doesn't have permission to forward)
         print(f"Error forwarding message: {e}")
-        
+
+
 
 
 
