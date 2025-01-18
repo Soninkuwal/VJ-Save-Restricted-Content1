@@ -3,21 +3,33 @@
 # Ask Doubt on telegram @KingVJ01
 
 import os
-import asyncio 
+import asyncio
 import pyrogram
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message 
-from config import API_ID, API_HASH, ERROR_MESSAGE
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from config import API_ID, API_HASH, BOT_TOKEN, ERROR_MESSAGE, ADMINS, LOG_CHANNEL
 from database.db import db
 from TechVJ.strings import HELP_TXT
-
-import tempfile
 
 class batch_temp(object):
     IS_BATCH = {}
 
-async def downstatus(client, statusfile, message, chat):
+# Error handling decorator
+def error_handler(func):
+    async def wrapper(client: Client, message: Message, *args, **kwargs):
+        try:
+            return await func(client, message, *args, **kwargs)
+        except Exception as e:
+            if ERROR_MESSAGE:
+                await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
+            if LOG_CHANNEL:
+                error_info = f"Error: {e}\nCommand: {message.text}\nUser: {message.from_user.id} {message.from_user.username} {message.from_user.first_name}"
+                await client.send_message(LOG_CHANNEL, error_info)
+    return wrapper
+
+# download status
+async def downstatus(client, statusfile, message, chat, file_type):
     while True:
         if os.path.exists(statusfile):
             break
@@ -28,14 +40,14 @@ async def downstatus(client, statusfile, message, chat):
         with open(statusfile, "r") as downread:
             txt = downread.read()
         try:
-            await client.edit_message_text(chat, message.id, f"**Downloaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
+            await client.edit_message_text(chat, message.id, f"**Downloading {file_type}: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
 
 
 # upload status
-async def upstatus(client, statusfile, message, chat):
+async def upstatus(client, statusfile, message, chat, file_type):
     while True:
         if os.path.exists(statusfile):
             break
@@ -45,113 +57,22 @@ async def upstatus(client, statusfile, message, chat):
         with open(statusfile, "r") as upread:
             txt = upread.read()
         try:
-            await client.edit_message_text(chat, message.id, f"**Uploaded : <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
+            await client.edit_message_text(chat, message.id, f"**Uploading {file_type}: <a href=https://t.me/SONICKUWALUPDATEKANHA>JOIN UPDATED CHANNEL</a>** **{txt}**")
             await asyncio.sleep(10)
         except:
             await asyncio.sleep(5)
 
 
-# Unified progress bar
-def progress(current, total, message, operation):
-    percent = f"{current * 100 / total:.1f}%"
-    with open(f"{message.id}_{operation}_status.txt", "w") as file:
-        file.write(f"{operation.capitalize()} Progress: {percent}")
-
-# Cleanup after progress tracking
-async def clean_progress_files(message_id, operation):
-    status_file = f"{message_id}_{operation}_status.txt"
-    if os.path.exists(status_file):
-        os.remove(status_file)
-
-
-
-
-# Permanent thumbnail management
-async def set_thumbnail(client: Client, message: Message):
-    if not message.document:
-        return await message.reply_text("Please reply to a valid image to set as thumbnail.")
-    thumb_path = await safe_file_operation(client.download_media, message.document)
-    global THUMBNAIL_PATH
-    THUMBNAIL_PATH = thumb_path
-    await message.reply_text("Thumbnail updated successfully!")
-
-
-# Optimized slow speed handling with semaphore
-semaphore = asyncio.Semaphore(3)
-
-# Command to remove global thumbnail
-@Client.on_message(filters.command(["remove_thumbnail"]))
-async def remove_thumbnail(client, message):
-    global THUMBNAIL_PATH
-    if os.path.exists(THUMBNAIL_PATH):
-        os.remove(THUMBNAIL_PATH)
-        THUMBNAIL_PATH = None
-        await message.reply_text("Thumbnail removed successfully!")
-    else:
-        await message.reply_text("No thumbnail set.")
-        
-
-
-# Progress callback with retry mechanism
+# progress writer
 def progress(current, total, message, type):
-    with open(f'{message.id}{type}status.txt', "w") as status_file:
-        status_file.write(f"{current * 100 / total:.1f}%")
-
-# Enhanced download status tracking
-async def track_status(client, statusfile, message, text_prefix, chat):
-    while not os.path.exists(statusfile):
-        await asyncio.sleep(2)
-
-    while os.path.exists(statusfile):
-        with open(statusfile, "r") as file:
-            status = file.read()
-        try:
-            await client.edit_message_text(
-                chat_id=chat,
-                message_id=message.id,
-                text=f"{text_prefix} **{status}**",
-                parse_mode=enums.ParseMode.HTML
-            )
-            await asyncio.sleep(5)
-        except FloodWait as e:
-            await asyncio.sleep(e.value)
-
-# Optimized file handling with retry logic
-async def safe_file_operation(operation, *args, retries=3):
-    for attempt in range(retries):
-        try:
-            return await operation(*args)
-        except Exception as e:
-            if attempt == retries - 1:
-                raise e
-            await asyncio.sleep(2)
-
-# Handle private chats and file operations
-async def handle_private(client, acc, message, chatid, msgid):
-    try:
-        msg = await acc.get_messages(chatid, msgid)
-        if msg.empty:
-            return
-
-        file_path = await safe_file_operation(acc.download_media, msg, progress, [message, "down"])
-        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            raise ValueError("File is 0 KB or failed to download.")
-        
-        await safe_file_operation(client.send_document, message.chat.id, file_path, reply_to_message_id=message.id)
-        os.remove(file_path)
-
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await message.reply_text(f"Error: {str(e)}", parse_mode=enums.ParseMode.HTML)
-
-
-
-                   
-
+    with open(f'{message.id}{type}status.txt', "w") as fileup:
+        fileup.write(f"{current * 100 / total:.1f}%")
 
 # start command
-@Client.on_message(filters.command(["start"]))
+@Client.on_message(filters.command(["start"]) & filters.private)
+@error_handler
 async def send_start(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "👋")
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
     buttons = [[
@@ -171,8 +92,10 @@ async def send_start(client: Client, message: Message):
 
 
 # help command
-@Client.on_message(filters.command(["help"]))
+@Client.on_message(filters.command(["help"]) & filters.private)
+@error_handler
 async def send_help(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "ℹ️")
     await client.send_message(
         chat_id=message.chat.id, 
         text=f"{HELP_TXT}"
@@ -180,53 +103,138 @@ async def send_help(client: Client, message: Message):
 
 
 # cancel command
-@Client.on_message(filters.command(["cancel"]))
+@Client.on_message(filters.command(["cancel"]) & filters.private)
+@error_handler
 async def send_cancel(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "❌")
     batch_temp.IS_BATCH[message.from_user.id] = True
     await client.send_message(
         chat_id=message.chat.id, 
         text="**Batch Successfully Cancelled.**"
     )
+    return
 
 
-
-
-@Client.on_message(filters.command(["set_caption"]))
-async def set_caption(client, message):
-    if len(message.command) < 2:
-        await message.reply("Please provide a caption. Usage: /set_caption Your caption here")
-        return
-    new_caption = " ".join(message.command[1:])
-    await db.update_user(message.from_user.id, {"custom_caption": new_caption})
-    await message.reply(f"Custom caption set to: {new_caption}")
-@Client.on_message(filters.command(["add_replace_word"]))
-async def add_replace_word(client, message):
+# custom word replace command
+@Client.on_message(filters.command("replace") & filters.private)
+@error_handler
+async def set_replace_words(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "✍️")
     if len(message.command) < 3:
-        await message.reply("Usage: /add_replace_word word_to_replace new_word")
-        return
-    word_to_replace, new_word = message.command[1], message.command[2]
-    user_data = await db.get_user(message.from_user.id)
-    replace_words = user_data.get("replace_words", [])
-    replace_words.append((word_to_replace, new_word))
-    await db.update_user(message.from_user.id, {"replace_words": replace_words})
-    await message.reply(f"Word '{word_to_replace}' will now be replaced with '{new_word}'.")
+        return await message.reply_text("Use: /replace <word> <replacement>")
+    
+    replace_data = await db.get_replace(message.from_user.id)
+    if replace_data is None:
+        await db.add_replace(message.from_user.id, {message.command[1]: message.command[2]})
+    else:
+        replace_data.update({message.command[1]: message.command[2]})
+        await db.update_replace(message.from_user.id, replace_data)
+    
+    await message.reply_text(f"**{message.command[1]}** will be replaced with **{message.command[2]}**")
+    return
 
-@Client.on_message(filters.command(["remove_replace_word"]))
-async def remove_replace_word(client, message):
+# delete word replace command
+@Client.on_message(filters.command("delreplace") & filters.private)
+@error_handler
+async def del_replace_words(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "🗑️")
     if len(message.command) < 2:
-        await message.reply("Usage: /remove_replace_word word_to_replace")
-        return
-    word_to_replace = message.command[1]
-    user_data = await db.get_user(message.from_user.id)
-    replace_words = [w for w in user_data.get("replace_words", []) if w[0] != word_to_replace]
-    await db.update_user(message.from_user.id, {"replace_words": replace_words})
-    await message.reply(f"Word '{word_to_replace}' has been removed from replace list.")
+       return await message.reply_text("Use: /delreplace <word>")
+   
+    replace_data = await db.get_replace(message.from_user.id)
+    if replace_data is None:
+        return await message.reply_text("You haven't set any word to replace yet.")
+    
+    if message.command[1] in replace_data:
+        del replace_data[message.command[1]]
+        await db.update_replace(message.from_user.id, replace_data)
+        await message.reply_text(f"**{message.command[1]}** will not be replaced")
+    else:
+        await message.reply_text(f"Word **{message.command[1]}** not found in replace list.")
+    return
 
 
+# show replace words
+@Client.on_message(filters.command("showreplace") & filters.private)
+@error_handler
+async def show_replace_words(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "📑")
+    replace_data = await db.get_replace(message.from_user.id)
+    if replace_data is None:
+        return await message.reply_text("You haven't set any word to replace yet.")
+    text = ""
+    for i,j in replace_data.items():
+        text += f"{i} => {j} \n"
+    
+    await message.reply_text(f"**Replaced Word List:** \n\n {text}")
+    return
+
+
+# custom thumbnail set
+@Client.on_message(filters.command("thumbnail") & filters.private)
+@error_handler
+async def set_thumbnail(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "🖼️")
+    if message.reply_to_message:
+        if message.reply_to_message.photo or message.reply_to_message.document:
+            file_id = message.reply_to_message.photo.file_id if message.reply_to_message.photo else message.reply_to_message.document.file_id
+            await db.set_thumb(message.from_user.id, file_id)
+            await message.reply_text("Thumbnail updated!")
+            return
+        
+        else:
+            return await message.reply_text("Reply to Photo/Document to set as thumbnail.")
+
+    await message.reply_text("Reply to Photo/Document to set as thumbnail.")
+    return
+
+# custom thumbnail delete
+@Client.on_message(filters.command("delthumb") & filters.private)
+@error_handler
+async def delete_thumbnail(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "🗑️")
+    await db.del_thumb(message.from_user.id)
+    await message.reply_text("Thumbnail removed!")
+    return
+
+# automatic forward message to custom channel
+@Client.on_message(filters.command("setchannel") & filters.private)
+@error_handler
+async def set_forward_channel(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "📢")
+    if len(message.command) < 2:
+        return await message.reply_text("Use: /setchannel <channel_id>")
+    try:
+        channel_id = int(message.command[1])
+    except ValueError:
+        return await message.reply_text("Invalid channel ID. Please provide an integer.")
+    
+    await db.set_forward_channel(message.from_user.id, channel_id)
+    await message.reply_text(f"Forward channel set to `{channel_id}`")
+    return
+
+# remove forward channel
+@Client.on_message(filters.command("delchannel") & filters.private)
+@error_handler
+async def del_forward_channel(client: Client, message: Message):
+    await client.react(message.chat.id, message.id, "🗑️")
+    await db.del_forward_channel(message.from_user.id)
+    await message.reply_text("Forward channel removed!")
+    return
 
 
 @Client.on_message(filters.text & filters.private)
+@error_handler
 async def save(client: Client, message: Message):
+    
+    user_replace_data = await db.get_replace(message.from_user.id)
+    if user_replace_data is not None:
+        text = message.text
+        for i,j in user_replace_data.items():
+           text = text.replace(i,j) 
+        
+        message.text = text
+        
     if "https://t.me/" in message.text:
         if batch_temp.IS_BATCH.get(message.from_user.id) == False:
             return await message.reply_text("**One Task Is Already Processing. Wait For Complete It. If You Want To Cancel This Task Then Use - /cancel**")
@@ -310,33 +318,36 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             return 
 
-    smsg = await client.send_message(message.chat.id, '**Downloading**', reply_to_message_id=message.id)
-    asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat))
+    smsg = await client.send_message(message.chat.id, f'**Downloading {msg_type}**', reply_to_message_id=message.id)
+    asyncio.create_task(downstatus(client, f'{message.id}downstatus.txt', smsg, chat, msg_type))
     try:
         file = await acc.download_media(msg, progress=progress, progress_args=[message,"down"])
-        os.remove(f'{message.id}downstatus.txt')
     except Exception as e:
         if ERROR_MESSAGE == True:
             await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML) 
         return await smsg.delete()
+    if not os.path.exists(file):
+        return await smsg.delete()
+    os.remove(f'{message.id}downstatus.txt')
     if batch_temp.IS_BATCH.get(message.from_user.id): return 
-    asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, chat))
-
+    asyncio.create_task(upstatus(client, f'{message.id}upstatus.txt', smsg, chat, msg_type))
 
     if msg.caption:
         caption = msg.caption
     else:
         caption = None
     if batch_temp.IS_BATCH.get(message.from_user.id): return 
+    thumb = await db.get_thumb(message.from_user.id)
+    ph_path = None
+    if thumb is not None:
+        try:
+           ph_path = await acc.download_media(thumb)
+        except:
+            pass
             
     if "Document" == msg_type:
         try:
-            ph_path = await acc.download_media(msg.document.thumbs[0].file_id)
-        except:
-            ph_path = None
-        
-        try:
-            await client.send_document(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
+           await client.send_document(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
         except Exception as e:
             if ERROR_MESSAGE == True:
                 await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -344,11 +355,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
         
 
     elif "Video" == msg_type:
-        try:
-            ph_path = await acc.download_media(msg.video.thumbs[0].file_id)
-        except:
-            ph_path = None
-        
+      
         try:
             await client.send_video(chat, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
         except Exception as e:
@@ -378,11 +385,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
 
     elif "Audio" == msg_type:
-        try:
-            ph_path = await acc.download_media(msg.audio.thumbs[0].file_id)
-        except:
-            ph_path = None
-
+      
         try:
             await client.send_audio(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])   
         except Exception as e:
@@ -400,9 +403,16 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     
     if os.path.exists(f'{message.id}upstatus.txt'): 
         os.remove(f'{message.id}upstatus.txt')
-        os.remove(file)
-    await client.delete_messages(message.chat.id,[smsg.id])
+    
+    forward_channel = await db.get_forward_channel(message.from_user.id)
+    if forward_channel:
+        try:
+           await client.copy_message(forward_channel,chat, message.id)
+        except:
+            pass
+    os.remove(file)
 
+    await client.delete_messages(message.chat.id,[smsg.id])
 
 
 # get the type of message
@@ -454,4 +464,13 @@ def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
         return "Text"
     except:
         pass
-        
+
+
+if __name__ == "__main__":
+    bot = Client(
+        "Save_Restricted",
+        api_id=API_ID,
+        api_hash=API_HASH,
+        bot_token=BOT_TOKEN
+    )
+    bot.run()
