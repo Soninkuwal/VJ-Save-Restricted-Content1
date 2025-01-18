@@ -483,4 +483,145 @@ async def handle_message(client: Client, acc: Client, message: Message, msg: Mes
             )
         except Exception as e:
             await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
+   elif "Audio" == msg_type:
+        try:
+            if not thumb:
+                ph_path = await acc.download_media(msg.audio.thumbs[0].file_id)
+                thumb = ph_path
+            else:
+                ph_path = None
+        except:
+            ph_path = None
 
+        try:
+            await client.send_audio(
+                chat,
+                file,
+                thumb=thumb,
+                caption=caption,
+                reply_to_message_id=message.id,
+                progress=progress,
+                progress_args=[message, "up"],
+            )
+        except Exception as e:
+            await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
+
+        if ph_path:
+            os.remove(ph_path)
+    elif "Photo" == msg_type:
+        try:
+            await client.send_photo(chat, file, caption=caption, reply_to_message_id=message.id)
+        except Exception as e:
+            await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
+
+    if os.path.exists(f"{message.id}upstatus.txt"):
+        os.remove(f"{message.id}upstatus.txt")
+    if os.path.exists(file):
+        os.remove(file)
+    await client.delete_messages(message.chat.id, [smsg.id])
+
+@Client.on_message(filters.command(["cancel_batch"]))
+async def cancel_batch_command(client: Client, message: Message):
+    global BATCH_RUNNING
+    if message.chat.id in BATCH_RUNNING:
+        BATCH_RUNNING[message.chat.id].cancel()
+        del BATCH_RUNNING[message.chat.id]
+        await client.send_message(message.chat.id, "Current batch process cancelled.", reply_to_message_id=message.id)
+    else:
+        await client.send_message(message.chat.id, "No batch process is running.", reply_to_message_id=message.id)
+
+# --- Login and Logout ---
+
+
+@Client.on_message(filters.command(["login"]))
+async def login(client, message):
+    try:
+        user_data = database.find_one({"chat_id": message.chat.id})
+        if user_data and user_data['logged_in'] is True:
+            await message.reply_text(strings['already_logged_in'])
+            return
+        data = message.text.split(" ", 1)[1]
+        session_string = data.strip()
+        logged_acc = Client("saverestricted", session_string=session_string, api_hash=API_HASH, api_id=API_ID)
+        await logged_acc.connect()
+        me = await logged_acc.get_me()
+        database.update_one(
+            {"chat_id": message.chat.id},
+            {
+                "$set": {
+                    "session": session_string,
+                    "name": me.first_name,
+                    "username": me.username,
+                    "logged_in": True,
+                }
+            },
+            upsert=True,
+        )
+        await message.reply_text(strings['logged_in'].format(me.first_name))
+    except Exception as e:
+        print(e)
+        await message.reply_text("Invalid session")
+
+@Client.on_message(filters.command(["logout"]))
+async def logout(client, message):
+    try:
+        user_data = database.find_one({"chat_id": message.chat.id})
+        if user_data and user_data['logged_in'] is True:
+            database.update_one({"chat_id": message.chat.id}, {"$set": {"logged_in": False}})
+            await message.reply_text(strings['logged_out'])
+        else:
+            await message.reply_text(strings['already_logged_out'])
+    except Exception as e:
+        print(e)
+
+# --- Helper Functions ---
+
+# get the type of message
+def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
+    try:
+        msg.document.file_id
+        return "Document"
+    except:
+        pass
+
+    try:
+        msg.video.file_id
+        return "Video"
+    except:
+        pass
+
+    try:
+        msg.animation.file_id
+        return "Animation"
+    except:
+        pass
+
+    try:
+        msg.sticker.file_id
+        return "Sticker"
+    except:
+        pass
+
+    try:
+        msg.voice.file_id
+        return "Voice"
+    except:
+        pass
+
+    try:
+        msg.audio.file_id
+        return "Audio"
+    except:
+        pass
+
+    try:
+        msg.photo.file_id
+        return "Photo"
+    except:
+        pass
+
+    try:
+        msg.text
+        return "Text"
+    except:
+        pass 
