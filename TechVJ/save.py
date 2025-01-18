@@ -377,7 +377,8 @@ async def handle_message(client: Client, acc: Client, message: Message, msg: Mes
                 await acc.copy_message(CUSTOM_CHANNEL_ID, msg.chat.id, msg.id)
         except Exception as e:
             print(f"Failed to forward message to custom channel: {e}")
-	    if "Text" == msg_type:
+
+    if "Text" == msg_type:
         try:
             caption = apply_custom_caption(msg.text)
             await client.send_message(chat, caption, entities=msg.entities, reply_to_message_id=message.id)
@@ -400,7 +401,7 @@ async def handle_message(client: Client, acc: Client, message: Message, msg: Mes
     caption = apply_custom_caption(msg.caption)
 
     thumb = DEFAULT_THUMBNAIL
-	      if "Document" == msg_type:
+    if "Document" == msg_type:
         try:
             if not thumb:
                 ph_path = await acc.download_media(msg.document.thumbs[0].file_id)
