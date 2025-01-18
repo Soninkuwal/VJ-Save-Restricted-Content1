@@ -69,7 +69,7 @@ def progress(current, total, message, type):
         fileup.write(f"{current * 100 / total:.1f}%")
 
 # start command
-@Client.on_message(filters.command(["start"]) & filters.private)
+@Client.on_message(filters.command(["start"]))
 @error_handler
 async def send_start(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "👋")
@@ -92,7 +92,7 @@ async def send_start(client: Client, message: Message):
 
 
 # help command
-@Client.on_message(filters.command(["help"]) & filters.private)
+@Client.on_message(filters.command(["help"]))
 @error_handler
 async def send_help(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "ℹ️")
@@ -103,7 +103,7 @@ async def send_help(client: Client, message: Message):
 
 
 # cancel command
-@Client.on_message(filters.command(["cancel"]) & filters.private)
+@Client.on_message(filters.command(["cancel"]))
 @error_handler
 async def send_cancel(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "❌")
@@ -116,7 +116,7 @@ async def send_cancel(client: Client, message: Message):
 
 
 # custom word replace command
-@Client.on_message(filters.command("replace") & filters.private)
+@Client.on_message(filters.command("replace"))
 @error_handler
 async def set_replace_words(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "✍️")
@@ -134,7 +134,7 @@ async def set_replace_words(client: Client, message: Message):
     return
 
 # delete word replace command
-@Client.on_message(filters.command("delreplace") & filters.private)
+@Client.on_message(filters.command("delreplace"))
 @error_handler
 async def del_replace_words(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "🗑️")
@@ -155,7 +155,7 @@ async def del_replace_words(client: Client, message: Message):
 
 
 # show replace words
-@Client.on_message(filters.command("showreplace") & filters.private)
+@Client.on_message(filters.command("showreplace"))
 @error_handler
 async def show_replace_words(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "📑")
@@ -171,7 +171,7 @@ async def show_replace_words(client: Client, message: Message):
 
 
 # custom thumbnail set
-@Client.on_message(filters.command("thumbnail") & filters.private)
+@Client.on_message(filters.command("thumbnail"))
 @error_handler
 async def set_thumbnail(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "🖼️")
@@ -189,7 +189,7 @@ async def set_thumbnail(client: Client, message: Message):
     return
 
 # custom thumbnail delete
-@Client.on_message(filters.command("delthumb") & filters.private)
+@Client.on_message(filters.command("delthumb"))
 @error_handler
 async def delete_thumbnail(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "🗑️")
@@ -198,7 +198,7 @@ async def delete_thumbnail(client: Client, message: Message):
     return
 
 # automatic forward message to custom channel
-@Client.on_message(filters.command("setchannel") & filters.private)
+@Client.on_message(filters.command("setchannel"))
 @error_handler
 async def set_forward_channel(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "📢")
@@ -214,7 +214,7 @@ async def set_forward_channel(client: Client, message: Message):
     return
 
 # remove forward channel
-@Client.on_message(filters.command("delchannel") & filters.private)
+@Client.on_message(filters.command("delchannel"))
 @error_handler
 async def del_forward_channel(client: Client, message: Message):
     await client.react(message.chat.id, message.id, "🗑️")
