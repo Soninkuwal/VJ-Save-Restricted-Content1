@@ -484,7 +484,7 @@ async def handle_message(client: Client, acc: Client, message: Message, msg: Mes
             )
         except Exception as e:
             await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
-   elif "Audio" == msg_type:
+    elif "Audio" == msg_type:
         try:
             if not thumb:
                 ph_path = await acc.download_media(msg.audio.thumbs[0].file_id)
