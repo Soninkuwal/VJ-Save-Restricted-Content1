@@ -16,11 +16,17 @@ ADMINS = int(os.environ.get("ADMINS", ""))
 DB_URI = os.environ.get("DB_URI", "")
 DB_NAME = os.environ.get("DB_NAME", "")
 
+# Admin and Log
+ADMINS = [int(id) for id in os.environ.get("ADMINS", "").split(",")]
+LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", ""))
+
+# Features
+ERROR_MESSAGE = True
+AUTO_FORWARD_CHANNEL = os.environ.get("AUTO_FORWARD_CHANNEL")
+DEFAULT_REACTIONS = ["👍", "❤️", "🔥"] #Default reactions for the bot on messages
+
 # If You Want Error Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
 ERROR_MESSAGE = bool(os.environ.get('ERROR_MESSAGE', False))
 
 
-# If You Want group & channel Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
-# Check if the bot is working in a group and channel
-WORKING_GROUP = bool(os.environ.get("WORKING_GROUP", True))
-WORKING_CHANNEL = bool(os.environ.get("WORKING_CHANNEL", True))
+
