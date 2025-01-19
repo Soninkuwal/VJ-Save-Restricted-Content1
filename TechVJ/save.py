@@ -10,7 +10,7 @@ from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied, MessageEmpty
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
-from config import API_ID, API_HASH
+from config import API_ID, API_HASH, ADMINS
 from database.db import database
 from TechVJ.strings import strings, HELP_TXT
 
@@ -130,7 +130,7 @@ class Settings:
 
 # --- Command Handlers ---
 
-@Client.on_message(filters.command(["start"]) & filters.private)
+@Client.on_message(filters.command(["start"]))
 async def send_start(client: Client, message: Message):
     buttons = [[
         InlineKeyboardButton("❣️ Developer", url="http://t.me/Sonickuwalupdatebot")
@@ -146,11 +146,11 @@ async def send_start(client: Client, message: Message):
         reply_to_message_id=message.id
     )
 
-@Client.on_message(filters.command(["help"]) & filters.private)
+@Client.on_message(filters.command(["help"]))
 async def send_help(client: Client, message: Message):
     await client.send_message(message.chat.id, f"{HELP_TXT}")
 
-@Client.on_message(filters.command("settings") & filters.private)
+@Client.on_message(filters.command("settings"))
 async def settings_command(client: Client, message: Message):
     if not is_admin(message.from_user.id):
         await message.reply_text("You are not authorized to use this command.")
@@ -188,7 +188,7 @@ async def settings_command(client: Client, message: Message):
     reply_markup = InlineKeyboardMarkup(buttons)
     await message.reply_text("Bot Settings:", reply_markup=reply_markup)
 
-@Client.on_message(filters.command("add_admin") & filters.private)
+@Client.on_message(filters.command("add_admin") & filters.ADMINS)
 async def add_admin_command(client: Client, message: Message):
     if not is_admin(message.from_user.id):
         await message.reply_text("You are not authorized to use this command.")
@@ -205,7 +205,7 @@ async def add_admin_command(client: Client, message: Message):
     except ValueError:
         await message.reply_text("Invalid user ID.")
 
-@Client.on_message(filters.command("cancel_batch") & filters.private)
+@Client.on_message(filters.command("cancel_batch"))
 async def cancel_batch_command(client: Client, message: Message):
     if not is_admin(message.from_user.id):
         await message.reply_text("You are not authorized to use this command.")
@@ -538,7 +538,7 @@ async def save(client: Client, message: Message):
 
 # --- Login/Logout ---
 
-@Client.on_message(filters.command(["login"]) & filters.private)
+@Client.on_message(filters.command(["login"]))
 async def login(client: Client, message: Message):
     user_data = database.find_one({'chat_id': message.chat.id})
     if user_data and get(user_data, 'logged_in', False) and get(user_data, 'session', None):
@@ -603,7 +603,7 @@ async def login(client: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"Error: {e}")
 
-@Client.on_message(filters.command(["logout"]) & filters.private)
+@Client.on_message(filters.command(["logout"]))
 async def logout(client: Client, message: Message):
     user_data = database.find_one({'chat_id': message.chat.id})
     if not get(user_data, 'logged_in', False) or user_data['session'] is None:
