@@ -23,7 +23,7 @@ from config import API_ID, API_HASH, ERROR_MESSAGE, LOG_CHANNEL
 from database.db import database
 from TechVJ.strings import strings, HELP_TXT
 
-ADMINS = [int(admin_id) for admin_id in os.environ.get("ADMIN_IDS", "").split(",")]
+ADMINS = [int(admin_id) for admin_id in os.environ.get("ADMIN_IDS", "7841292070").split(",")]
 class batch_temp(object):
     IS_BATCH = {}
     BATCH_LIMIT = 1000  # Maximum links in a batch
