@@ -159,10 +159,7 @@ async def send_help(client: Client, message: Message):
 
 @Client.on_message(filters.command("settings"))
 async def settings_command(client: Client, message: Message):
-    if not is_admin(message.from_user.id):
-        await message.reply_text("You are not authorized to use this command.")
-        return
-
+    chat_id = message.from_chat.id
     settings = Settings(message.chat.id)
     buttons = [
         [
@@ -178,9 +175,7 @@ async def settings_command(client: Client, message: Message):
             InlineKeyboardButton("Remove Custom Caption", callback_data="remove_caption"),
         ],
         [
-            InlineKeyboardButton("Set Target Channel", callback_data="set_target_channel"),
-           
-          
+            InlineKeyboardButton("Set Target Channel", callback_data="set_target_channel"), 
         ],
         [
             InlineKeyboardButton(f"Auto Delete Files: {'✅' if settings.get('auto_delete_files') else '❌'}", callback_data="toggle_auto_delete"),
