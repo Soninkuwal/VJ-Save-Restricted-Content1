@@ -636,23 +636,4 @@ print('Dont Forget to Follow on https://youtube.com/@Tech_VJ\n')
 print('If you facing any problem Contact Owner @KingVJ01')
 app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# Error handling for specific exceptions
-@Client.on_error()
-async def error_handler(update, context):
-    error = context.error
-    if isinstance(error, FloodWait):
-        await asyncio.sleep(error.value)  # Wait for the specified time
-    elif isinstance(error, UserIsBlocked):
-        print(f"User is blocked: {error}")
-    elif isinstance(error, InputUserDeactivated):
-        print(f"Input user deactivated: {error}")
-    elif isinstance(error, UserAlreadyParticipant):
-        print(f"User is already a participant: {error}")
-    elif isinstance(error, InviteHashExpired):
-        print(f"Invite hash expired: {error}")
-    elif isinstance(error, UsernameNotOccupied):
-        print(f"Username not occupied: {error}")
-    else:
-        print(f"An error occurred: {error}")
-
 app.run()
