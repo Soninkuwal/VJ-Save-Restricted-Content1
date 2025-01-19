@@ -262,7 +262,7 @@ async def start_batch(client: Client, message: Message):
     BATCH_LINKS[user_id] = []
     await message.reply_text("Please send me the links you want to include in the batch, one by one. Send /done_batch when you're finished.")
 
-@Client.on_message(filters.command(["done_batch"]) & filters.private)
+@Client.on_message(filters.command(["done_batch"]))
 async def end_batch(client: Client, message: Message):
     user_id = message.from_user.id
     if user_id not in BATCH_LINKS:
@@ -295,7 +295,7 @@ async def end_batch(client: Client, message: Message):
     batch_task = asyncio.create_task(process_batch())
     BATCH_TASKS[user_id] = batch_task
 
-@Client.on_message(filters.command(["cancel_batch"]) & filters.private)
+@Client.on_message(filters.command(["cancel_batch"]))
 async def cancel_batch(client: Client, message: Message):
     user_id = message.from_user.id
     if user_id not in BATCH_LINKS:
