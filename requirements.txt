@@ -10,6 +10,10 @@ pyrogram
 asyncio
 pillow
 
+python-dotenv
+pymongo
+tqdm
+
 
 Flask==1.1.2
 gunicorn==20.1.0
