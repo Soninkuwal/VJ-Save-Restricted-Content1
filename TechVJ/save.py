@@ -636,4 +636,4 @@ print('Dont Forget to Follow on https://youtube.com/@Tech_VJ\n')
 print('If you facing any problem Contact Owner @KingVJ01')
 app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-app.run()
+
