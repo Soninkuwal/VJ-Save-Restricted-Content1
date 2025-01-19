@@ -10,7 +10,7 @@ from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied, MessageEmpty
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
-from config import API_ID, API_HASH, ADMINS
+from config import API_ID, API_HASH, admin
 from database.db import database
 from TechVJ.strings import strings, HELP_TXT
 
@@ -197,7 +197,7 @@ async def settings_command(client: Client, message: Message):
     reply_markup = InlineKeyboardMarkup(buttons)
     await message.reply_text("Bot Settings:", reply_markup=reply_markup)
 
-@Client.on_message(filters.command("add_admin") & filters.ADMINS)
+@Client.on_message(filters.command("add_admin") & filters.admin)
 async def add_admin_command(client: Client, message: Message):
     if not is_admin(message.from_user.id):
         await message.reply_text("You are not authorized to use this command.")
