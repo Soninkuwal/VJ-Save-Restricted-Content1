@@ -18,6 +18,8 @@ from TechVJ.strings import strings, HELP_TXT
 MAX_BATCH_SIZE = 1000
 ADMIN_LIST = []  # Initialize with your admin user IDs later
 
+# === END GLOBAL SETTINGS ===
+
 # --- Helper Functions ---
 
 def get(obj, key, default=None):
@@ -128,6 +130,11 @@ class Settings:
             del self.data["replace_words"][original]
             database.update_settings(self.chat_id, self.data)
 
+    
+
+    
+
+
 # --- Command Handlers ---
 
 @Client.on_message(filters.command(["start"]))
@@ -172,6 +179,8 @@ async def settings_command(client: Client, message: Message):
         ],
         [
             InlineKeyboardButton("Set Target Channel", callback_data="set_target_channel"),
+           
+          
         ],
         [
             InlineKeyboardButton(f"Auto Delete Files: {'✅' if settings.get('auto_delete_files') else '❌'}", callback_data="toggle_auto_delete"),
