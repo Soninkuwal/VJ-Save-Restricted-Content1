@@ -9,7 +9,7 @@ import os
 import threading
 import json
 import logging
-from config import API_ID, API_HASH
+from config import API_ID, API_HASH, ADMINS
 from database.db import database  # Assuming you have a db module
 from TechVJ.strings import strings, HELP_TXT # Assume this is defined
 import datetime # Add datetime to make logging more specific
@@ -410,6 +410,8 @@ async def process_message(client: Client, message: Message, chatid, msgid):
         dl_file = msg.audio
       elif msg_type == 'Photo':
         dl_file = msg.photo
+      elif msg_type == 'Text':
+        dl_file = msg.text
 
       file = await client.download_media(dl_file, file_name = file, progress=progress, progress_args=[message,"down"])
       try:
@@ -444,6 +446,9 @@ async def process_message(client: Client, message: Message, chatid, msgid):
              await client.send_video(send_chat, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=thumb, caption=caption, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
         elif msg_type == "Animation":
             await client.send_animation(send_chat, file, caption=caption, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
+        elif msg_type == "Text":
+            await client.send_text(send_chat, file, caption=caption, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
+        
         elif msg_type == "Sticker":
             await client.send_sticker(send_chat, file)
         elif msg_type == "Voice":
