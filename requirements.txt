@@ -2,15 +2,13 @@ pyrofork==2.3.45
 tgcrypto
 pymongo[srv]==3.12.3
 motor
-
 aiofiles
 aiogram
 aiocache
-
 apscheduler
 pyrogram
-
 asyncio
+pillow
 
 
 Flask==1.1.2
