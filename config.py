@@ -13,7 +13,7 @@ API_HASH = os.environ.get("API_HASH", "")
 DB_URI = os.environ.get("DB_URI", "")
 
 # Admin and Log
-ADMINS = [int(id) for id in os.environ.get("ADMINS", "").split(",")]
+ADMIN = [int(id) for id in os.environ.get("ADMIN", "").split(",")]
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", ""))
 
 # Features
