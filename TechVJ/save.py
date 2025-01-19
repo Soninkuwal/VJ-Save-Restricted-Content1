@@ -159,7 +159,7 @@ async def send_help(client: Client, message: Message):
 
 @Client.on_message(filters.command("settings"))
 async def settings_command(client: Client, message: Message):
-    chat_id = message.from_chat.id
+    chat_id = message.chat.id
     settings = Settings(message.chat.id)
     buttons = [
         [
