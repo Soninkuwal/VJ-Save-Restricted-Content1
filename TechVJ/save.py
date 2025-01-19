@@ -637,7 +637,7 @@ print('If you facing any problem Contact Owner @KingVJ01')
 app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # Error handling for specific exceptions
-@app.on_error()
+@Client.on_error()
 async def error_handler(update, context):
     error = context.error
     if isinstance(error, FloodWait):
