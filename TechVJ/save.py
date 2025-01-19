@@ -159,7 +159,10 @@ async def send_help(client: Client, message: Message):
 
 @Client.on_message(filters.command("settings"))
 async def settings_command(client: Client, message: Message):
-    
+    if not is_admin(message.from_user.id):
+        await message.reply_text("You are not authorized to use this command.")
+        return
+        
     settings = Settings(message.chat.id)
     buttons = [
         [
