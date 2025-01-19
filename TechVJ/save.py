@@ -11,8 +11,7 @@ import pyrogram
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from dotenv import load_dotenv
-load_dotenv()
+
 import logging
 from tqdm.asyncio import tqdm
 import re
