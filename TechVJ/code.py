@@ -18,7 +18,7 @@ from database.db import database
 from TechVJ.strings import strings, HELP_TXT
 
 # --- Constants ---
-ADMINS = [1234567890]  # Replace with your admin IDs, you can add multiple
+ADMINS = [7841292070]  # Replace with your admin IDs, you can add multiple admin on bot
 THUMBNAIL_COLLECTION = "thumbnails"
 BATCHES = {}  # Store active batch processes {chat_id: {msg_id, from_id, to_id}}
 CUSTOM_CAPTIONS = {}  # {user_id: "Custom Caption"}
