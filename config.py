@@ -14,6 +14,7 @@ DB_URI = os.environ.get("DB_URI", "")
 
 # Admin and Log
 ADMIN = [int(id) for id in os.environ.get("ADMIN", "").split(",")]
+ADMINS = [int(id) for id in os.environ.get("ADMINS", "").split(",")]
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", ""))
 
 # Features
