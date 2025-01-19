@@ -17,7 +17,7 @@ from pyrogram.errors import (
 )
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
-from config import API_ID, API_HASH
+from config import API_ID, API_HASH, CUSTOM_CHANNEL_ID
 from database.db import database
 from TechVJ.strings import strings, HELP_TXT
 
