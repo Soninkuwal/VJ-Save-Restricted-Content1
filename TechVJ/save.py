@@ -11,6 +11,8 @@ from config import API_ID, API_HASH, BOT_TOKEN, CUSTOM_CHANNEL_ID
 from database.db import database 
 from TechVJ.strings import strings, HELP_TXT
 
+CUSTOM_CHANNEL_ID = [-1002260543763]
+
 # Function to safely access dictionary elements
 def get(obj, key, default=None):
     try:
