@@ -82,7 +82,7 @@ async def update_user_settings(user_id, settings_dict):
 # --- Bot Commands ---
 
 # start command
-@Client.on_message(filters.command(["start"]) & filters.private)
+@Client.on_message(filters.command(["start"]))
 async def send_start(client: Client, message: Message):
     buttons = [[
         InlineKeyboardButton("❣️ Developer", url = "http://t.me/Sonickuwalupdatebot")
@@ -98,13 +98,13 @@ async def send_start(client: Client, message: Message):
     return
 
 # help command
-@Client.on_message(filters.command(["help"]) & filters.private)
+@Client.on_message(filters.command(["help"]))
 async def send_help(client: Client, message: Message):
     await client.send_message(message.chat.id, f"{HELP_TXT}")
 
 # --- Settings Command and Callbacks ---
 
-@Client.on_message(filters.command("settings") & filters.private)
+@Client.on_message(filters.command("settings"))
 async def settings_command(client: Client, message: Message):
     await settings_markup(client, message.chat.id, message.id)
 
