@@ -16,8 +16,8 @@ DB_URI = os.environ.get("DB_URI", "")
 ADMIN = [int(id) for id in os.environ.get("ADMIN", "").split(",")]
 ADMINS = [int(id) for id in os.environ.get("ADMINS", "").split(",")]
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", ""))
-
+CUSTOM_CHANNEL_ID = -1002260543763
 # Features
 ERROR_MESSAGE = True
-CUSTOM_CHANNEL_ID = os.environ.get("CUSTOM_CHANNEL_ID", "")
+#CUSTOM_CHANNEL_ID = os.environ.get("CUSTOM_CHANNEL_ID", "")
 DEFAULT_REACTIONS = ["👍", "❤️", "🔥"] #Default reactions for the bot on messages
