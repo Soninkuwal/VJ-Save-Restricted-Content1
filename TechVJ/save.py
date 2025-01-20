@@ -298,7 +298,7 @@ async def save(client: Client, message: Message):
             await asyncio.sleep(3 if bot_speed_normal else 6)
 
 # handle private
-async def handle_private(client: Client, acc: Client, message: Message, chatid: int or str, msgid: int, forward_to_channel: bool = False):
+async def handle_private(client: Client, acc: Client, message: Message, chatid: int or str, msgid: int, forward_to_channel: bool = True):
     try:
         msg: Message = await acc.get_messages(chatid, msgid)
         msg_type = get_message_type(msg)
