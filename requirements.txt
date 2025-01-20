@@ -13,6 +13,8 @@ pillow
 python-dotenv
 pymongo
 tqdm
+ffmpeg
+yt_dlp
 
 
 Flask==1.1.2
