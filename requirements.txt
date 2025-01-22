@@ -1,6 +1,17 @@
 pyrofork==2.3.45
 tgcrypto
 pymongo[srv]==3.12.3
+
+pyrofork==2.3.48
+motor
+aiofiles
+aiogram
+aiocache
+apscheduler
+pyrogram
+asyncio
+pymongo
+
 Flask==1.1.2
 gunicorn==20.1.0
 Jinja2==3.0.3
