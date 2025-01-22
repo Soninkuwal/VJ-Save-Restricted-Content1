@@ -2,7 +2,6 @@ pyrofork==2.3.45
 tgcrypto
 pymongo[srv]==3.12.3
 
-pyrofork==2.3.48
 motor
 aiofiles
 aiogram
