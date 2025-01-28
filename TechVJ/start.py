@@ -215,9 +215,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             try:
                 sent_msg = await client.send_message(chat, msg.text, entities=msg.entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
                 
-                # Forward to the custom channel
-                try:
-                  await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id)
+                
                 except Exception as e:
                     if ERROR_MESSAGE:
                         await client.send_message(message.chat.id, f"Error: while Forwarding Text: {e}", reply_to_message_id=message.id)
@@ -261,7 +259,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_document(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id)
+              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                    await client.send_message(message.chat.id, f"Error: while Forwarding Document: {e}", reply_to_message_id=message.id)
@@ -285,7 +283,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_video(chat, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id)
+              await client.forward_messages(FORWARD_CHANNEL_ID, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                   await client.send_message(message.chat.id, f"Error: while Forwarding Video: {e}", reply_to_message_id=message.id)
