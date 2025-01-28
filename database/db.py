@@ -1,8 +1,6 @@
 import motor.motor_asyncio
 from config import DB_NAME, DB_URI
 
-from tinydb import TinyDB, Query
-
 class Database:
     
     def __init__(self, uri, database_name):
@@ -46,25 +44,3 @@ db = Database(DB_URI, DB_NAME)
 
 
 
-db = TinyDB('custom_words.json')
-
-CustomWords = Query()
-
-async def add_word(word, replacement):
-    """Add a custom word replacement."""
-    db.insert({'word': word, 'replacement': replacement})
-
-async def get_replacement(word):
-    """Get the replacement for a custom word."""
-    result = db.search(CustomWords.word == word)
-    if result:
-        return result[0]['replacement']
-    return None
-
-async def delete_word(word):
-  """Delete a word and its replacement"""
-  db.remove(CustomWords.word == word)
-
-async def all_words():
-   """Return all of the word and replacement pairs"""
-   return db.all()
