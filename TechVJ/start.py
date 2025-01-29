@@ -7,7 +7,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, 
 from config import API_ID, API_HASH, ERROR_MESSAGE
 from database.db import db
 from TechVJ.strings import HELP_TXT
-import re
 class batch_temp(object):
     IS_BATCH = {}
 
@@ -82,15 +81,7 @@ async def send_cancel(client: Client, message: Message):
         text="**Batch Successfully Cancelled.**"
     )
 
-# status command
-@Client.on_message(filters.command(["status"]))
-async def send_status(client: Client, message: Message):
-    status_message = "**Bot Status: Idle**" if batch_temp.IS_BATCH.get(message.from_user.id) == True else "**Bot Status: Busy**"
-    await client.send_message(
-        chat_id=message.chat.id,
-        text=status_message,
-         reply_to_message_id=message.id
-    )
+
 
 #settings command
 @Client.on_message(filters.command(["settings"]))
@@ -324,19 +315,7 @@ async def save(client: Client, message: Message):
             await asyncio.sleep(3)
         batch_temp.IS_BATCH[message.from_user.id] = True
 
-# Function to remove Telegram links, hashtags, and mentions
-def sanitize_text(text, custom_replace_words):
-    if not text: return None
-    # Remove URLs
-    text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
-    # Remove mentions
-    text = re.sub(r'@[\w_]+', '', text)
-    # Remove hashtags
-    text = re.sub(r'#[\w_]+', '', text)
-    if custom_replace_words:
-       for old, new in custom_replace_words:
-           text = text.replace(old, new)
-    return text
+
 
 # handle private
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
@@ -514,5 +493,4 @@ def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
         return "Text"
     except:
         pass
-from pyrogram import filters
-from pyrogram.handlers import MessageHandler
+
