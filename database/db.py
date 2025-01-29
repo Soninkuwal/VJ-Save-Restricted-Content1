@@ -1,6 +1,5 @@
 import motor.motor_asyncio
 from config import DB_NAME, DB_URI
-import sqlite3
 
 
 class Database:
@@ -15,6 +14,7 @@ class Database:
             id = id,
             name = name,
             session = None,
+            forward_channel_id=None,
         )
     
     async def add_user(self, id, name):
@@ -40,57 +40,41 @@ class Database:
 
     async def get_session(self, id):
         user = await self.col.find_one({'id': int(id)})
-        return user['session']
+        return user.get('session')
 
-    #new
     async def set_forward_channel(self, user_id: int, forward_channel_id: int):
-         self.cursor.execute(
-             "UPDATE users SET forward_channel_id = ? WHERE user_id = ?",
-            (forward_channel_id, user_id)
-        )
-         self.conn.commit()
+        await self.col.update_one({'id': int(user_id)}, {'$set': {'forward_channel_id': forward_channel_id}})
 
     async def get_forward_channel(self, user_id: int):
-        self.cursor.execute(
-            "SELECT forward_channel_id FROM users WHERE user_id = ?",
-            (user_id,)
-        )
-        result = self.cursor.fetchone()
-        return result[0] if result else None
-
+        user = await self.col.find_one({'id': int(user_id)})
+        return user.get('forward_channel_id')
 
     async def add_replace_word(self, old_word: str, new_word: str):
-        self.cursor.execute(
-            "INSERT OR REPLACE INTO replace_words (old_word, new_word) VALUES (?, ?)",
-            (old_word, new_word)
-        )
-        self.conn.commit()
-
+         replace_col = self.db.replace_words
+         await replace_col.insert_one({"old_word": old_word, "new_word": new_word})
+      
     async def get_replace_words(self):
-        self.cursor.execute("SELECT old_word, new_word FROM replace_words")
-        return self.cursor.fetchall()
+         replace_col = self.db.replace_words
+         cursor = replace_col.find({})
+         return await cursor.to_list(length=None)
 
     async def remove_replace_word(self, old_word: str):
-      self.cursor.execute("DELETE FROM replace_words WHERE old_word = ?", (old_word,))
-      self.conn.commit()
-      
+      replace_col = self.db.replace_words
+      await replace_col.delete_one({"old_word":old_word})
+
     async def add_delete_word(self, word: str):
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO delete_words (word) VALUES (?)",
-            (word,)
-        )
-        self.conn.commit()
+        delete_col = self.db.delete_words
+        await delete_col.insert_one({"word": word})
 
     async def get_delete_words(self):
-         self.cursor.execute("SELECT word FROM delete_words")
-         return [row[0] for row in self.cursor.fetchall()]
+         delete_col = self.db.delete_words
+         cursor = delete_col.find({})
+         result = await cursor.to_list(length=None)
+         return [row.get("word") for row in result ]
 
     async def remove_delete_word(self, word: str):
-      self.cursor.execute("DELETE FROM delete_words WHERE word = ?", (word,))
-      self.conn.commit()
-#newend
+        delete_col = self.db.delete_words
+        await delete_col.delete_one({"word": word})
 
 
 db = Database(DB_URI, DB_NAME)
-
-
