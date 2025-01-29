@@ -93,41 +93,6 @@ async def send_cancel(client: Client, message: Message):
     )
 
 
-# status command
-@Client.on_message(filters.command(["status"]))
-async def send_status(client: Client, message: Message):
-    status_message = "**Bot Status: Idle**" if batch_temp.IS_BATCH.get(message.from_user.id) == True else "**Bot Status: Busy**"
-    await client.send_message(
-        chat_id=message.chat.id,
-        text=status_message
-    )
-
-
-# Forwarded Message Command
-@Client.on_message(filters.command(["forwarded"]))
-async def send_forwarded_message(client: Client, message: Message):
-    text = "This is where all of your forwarded messages will show up. This command will work only for single message forward."
-    if FORWARD_CHANNEL_ID == 0:
-        await client.send_message(
-            chat_id=message.chat.id,
-            text="**Forward Channel Is Not Set Yet.**"
-        )
-        return
-    try:
-        async for msg in client.get_chat_history(FORWARD_CHANNEL_ID, limit=5):
-            if msg.forward_from_chat and msg.forward_from_chat.id == message.chat.id:
-                try:
-                    await client.copy_message(message.chat.id, msg.chat.id, msg.id)
-                except Exception as e:
-                    if ERROR_MESSAGE:
-                        await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
-
-        await client.send_message(message.chat.id, text, reply_to_message_id=message.id)
-    except Exception as e:
-        if ERROR_MESSAGE:
-            await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id)
-
-
 @Client.on_message(filters.text & filters.private)
 async def save(client: Client, message: Message):
     if "https://t.me/" in message.text:
