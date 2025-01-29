@@ -267,6 +267,7 @@ async def save(client: Client, message: Message):
         batch_temp.IS_BATCH[message.from_user.id] = True
 
 
+
 # handle private
 async def handle_private(client: Client, acc, message: Message, chatid: int, msgid: int):
     try:
@@ -280,22 +281,38 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
          return
     chat = message.chat.id
     if batch_temp.IS_BATCH.get(message.from_user.id): return
+
+    replace_words = await db.get_replace_words()
+    delete_words = await db.get_delete_words()
+
     if "Text" == msg_type:
-         if msg.text: # Check if text content exists
+        if msg.text:
+            text = msg.text
+
+            for old_word, new_word in replace_words:
+              text = re.sub(re.escape(old_word), new_word, text, flags=re.IGNORECASE)
+
+            for word in delete_words:
+              text = re.sub(re.escape(word), "", text, flags=re.IGNORECASE)
+              
             try:
-                sent_msg = await client.send_message(chat, msg.text, entities=msg.entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+                sent_msg = await client.send_message(chat, text, entities=msg.entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             except Exception as e:
-              if ERROR_MESSAGE:
-                 await client.send_message(message.chat.id, f"Error: Thumbnail Download Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
-                 ph_path = None    
+                if ERROR_MESSAGE:
+                   await client.send_message(message.chat.id, f"Error: Thumbnail Download Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+                   return
+
+            user_forward_channel_id = await db.get_forward_channel(message.from_user.id)
+
+            forward_channel_id = user_forward_channel_id if user_forward_channel_id else FORWARD_CHANNEL_ID
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)   
+              await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
                 return
-         else:
+        else:
              return
 
     smsg = await client.send_message(message.chat.id, '**Downloading**', reply_to_message_id=message.id)
@@ -314,8 +331,20 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
         caption = msg.caption
     else:
         caption = None
+
+    if caption:
+       for old_word, new_word in replace_words:
+         caption = re.sub(re.escape(old_word), new_word, caption, flags=re.IGNORECASE)
+
+       for word in delete_words:
+         caption = re.sub(re.escape(word), "", caption, flags=re.IGNORECASE)
+
     if batch_temp.IS_BATCH.get(message.from_user.id): return
 
+    user_forward_channel_id = await db.get_forward_channel(message.from_user.id)
+
+    forward_channel_id = user_forward_channel_id if user_forward_channel_id else FORWARD_CHANNEL_ID
+    
     if "Document" == msg_type:
         ph_path = None
         if msg.document.thumbs:
@@ -330,7 +359,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_document(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message,"up"])
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+              await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                    await client.send_message(message.chat.id, f"Error: while Forwarding Document: {e}", reply_to_message_id=message.id)
@@ -354,7 +383,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_video(chat, file, duration=msg.video.duration, width=msg.video.width, height=msg.video.height, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+              await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                   await client.send_message(message.chat.id, f"Error: while Forwarding Video: {e}", reply_to_message_id=message.id)
@@ -369,7 +398,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_animation(chat, file, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+               await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                    await client.send_message(message.chat.id, f"Error: while Forwarding Animation: {e}", reply_to_message_id=message.id)
@@ -382,7 +411,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_sticker(chat, file, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+                await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                    await client.send_message(message.chat.id, f"Error: while Forwarding Sticker: {e}", reply_to_message_id=message.id)
@@ -395,7 +424,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_voice(chat, file, caption=caption, caption_entities=msg.caption_entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
              # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+              await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                    await client.send_message(message.chat.id, f"Error: while Forwarding Voice: {e}", reply_to_message_id=message.id)
@@ -417,7 +446,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg= await client.send_audio(chat, file, thumb=ph_path, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML, progress=progress, progress_args=[message, "up"])
               # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+               await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                if ERROR_MESSAGE:
                  await client.send_message(message.chat.id, f"Error: while Forwarding Audio: {e}", reply_to_message_id=message.id)
@@ -433,7 +462,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             sent_msg = await client.send_photo(chat, file, caption=caption, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
             # Forward to the custom channel
             try:
-              await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id, sent_msg.id, disable_notification=True, drop_forward_header=True)
+               await client.forward_messages(forward_channel_id, message.chat.id, sent_msg.id)
             except Exception as e:
                 if ERROR_MESSAGE:
                     await client.send_message(message.chat.id, f"Error: while Forwarding Photo: {e}", reply_to_message_id=message.id)
@@ -441,19 +470,17 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             if ERROR_MESSAGE == True:
                await client.send_message(message.chat.id, f"Error: Send Photo Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
 
-
     if os.path.exists(f'{message.id}upstatus.txt'):
         os.remove(f'{message.id}upstatus.txt')
 
-    # forward custom channel
+    #Auto Delete After 2min
+    await asyncio.sleep(120)
     try:
-      await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id)
-    except Exception as e:
-        if ERROR_MESSAGE:
-           await client.send_message(message.chat.id, f"Error while Forwarding : {e}", reply_to_message_id=message.id)
+        await client.delete_messages(message.chat.id, [smsg.id, sent_msg.id])
+    except:
+       pass
 
-    os.remove(file)
-    await client.delete_messages(message.chat.id, [smsg.id])
+    os.remove(file)  
 
 
 # get the type of message
