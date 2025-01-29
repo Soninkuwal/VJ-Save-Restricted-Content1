@@ -85,9 +85,8 @@ class db:
         self.conn.commit()
 
 
-        
-        if not await db.is_user_exist(message.from_user.id):
     async def is_user_exist(self, user_id:int):
+        if not await db.is_user_exist(message.from_user.id):
         self.cursor.execute(
             "SELECT user_id FROM users WHERE user_id = ?",
             (user_id,)
