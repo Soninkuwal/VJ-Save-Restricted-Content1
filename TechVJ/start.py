@@ -12,6 +12,20 @@ from TechVJ.strings import HELP_TXT
 class batch_temp(object):
     IS_BATCH = {}
 
+async def auto_delete_message(client: Client, chat_id: int, message_id: int, delay: int = 5): # Auto delete function
+    await asyncio.sleep(delay)
+    try:
+        await client.delete_messages(chat_id, message_id)
+    except Exception as e:
+        logging.error(f"Error deleting message {message_id} in chat {chat_id}: {e}") # Log deletion errors
+
+async def send_message_auto_delete(client: Client, chat_id: int, text: str, reply_markup=None, reply_to_message_id=None, parse_mode=enums.ParseMode.HTML, delay: int = 5): # Send with auto delete
+    msg = await client.send_message(chat_id, text, reply_markup=reply_markup, reply_to_message_id=reply_to_message_id, parse_mode=parse_mode)
+    asyncio.create_task(auto_delete_message(client, chat_id, msg.id, delay))
+    return msg # Return message object if needed for further operations
+
+
+
 # download status
 async def downstatus(client, statusfile, message, chat):
     while True:
