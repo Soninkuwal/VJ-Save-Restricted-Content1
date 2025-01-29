@@ -1,5 +1,6 @@
 import motor.motor_asyncio
 from config import DB_NAME, DB_URI
+import sqlite3
 
 
 class Database:
@@ -41,74 +42,7 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user['session']
 
-db = Database(DB_URI, DB_NAME)
-
-
-
-import sqlite3
-
-class db:
-    def __init__(self, db_file="database.db"):
-        self.conn = sqlite3.connect(db_file)
-        self.cursor = self.conn.cursor()
-        self.init_tables()
-
-    def init_tables(self):
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY,
-                first_name TEXT,
-                session TEXT,
-                forward_channel_id INTEGER
-            )
-        """)
-
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS replace_words (
-                old_word TEXT PRIMARY KEY,
-                new_word TEXT
-            )
-        """)
-        
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS delete_words (
-                word TEXT PRIMARY KEY
-            )
-        """)
-        self.conn.commit()
-    
-    async def add_user(self, user_id: int, first_name: str):
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO users (user_id, first_name) VALUES (?, ?)",
-            (user_id, first_name)
-        )
-        self.conn.commit()
-
-
-    async def is_user_exist(self, user_id:int):
-        if not await db.is_user_exist(message.from_user.id):
-        self.cursor.execute(
-            "SELECT user_id FROM users WHERE user_id = ?",
-            (user_id,)
-        )
-        result = self.cursor.fetchone()
-        return result is not None
-    
-    async def get_session(self, user_id: int):
-         self.cursor.execute(
-             "SELECT session FROM users WHERE user_id = ?",
-            (user_id,)
-        )
-         result = self.cursor.fetchone()
-         return result[0] if result else None
-
-    async def save_session(self, user_id: int, session: str):
-        self.cursor.execute(
-            "UPDATE users SET session = ? WHERE user_id = ?",
-            (session, user_id)
-        )
-        self.conn.commit()
-    
+    #new
     async def set_forward_channel(self, user_id: int, forward_channel_id: int):
          self.cursor.execute(
              "UPDATE users SET forward_channel_id = ? WHERE user_id = ?",
@@ -154,5 +88,9 @@ class db:
     async def remove_delete_word(self, word: str):
       self.cursor.execute("DELETE FROM delete_words WHERE word = ?", (word,))
       self.conn.commit()
+#newend
 
-    
+
+db = Database(DB_URI, DB_NAME)
+
+
