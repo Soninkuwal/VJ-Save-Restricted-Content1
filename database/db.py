@@ -154,3 +154,6 @@ class db:
       self.conn.commit()
 
         
+if not await db.is_user_exist(message.from_user.id):
+
+    
