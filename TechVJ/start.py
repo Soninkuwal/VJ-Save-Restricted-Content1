@@ -214,6 +214,10 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
          if msg.text: # Check if text content exists
             try:
                 sent_msg = await client.send_message(chat, msg.text, entities=msg.entities, reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+            except Exception as e:
+              if ERROR_MESSAGE:
+                 await client.send_message(message.chat.id, f"Error: Thumbnail Download Error: {e}", reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
+                 ph_path = None    
             # Forward to the custom channel
             try:
               await client.forward_messages(FORWARD_CHANNEL_ID, message.chat.id)   
