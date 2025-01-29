@@ -495,3 +495,39 @@ def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
 
     try:
         msg.animation.file_id
+        return "Animation"
+    except:
+        pass
+        
+    try:
+        msg.photo.file_id
+        return "Photo"
+    except:
+        pass
+
+    try:
+        msg.audio.file_id
+        return "Audio"
+    except:
+        pass
+
+    try:
+        msg.voice.file_id
+        return "Voice"
+    except:
+        pass
+
+
+    try:
+        msg.sticker.file_id
+        return "Sticker"
+    except:
+        pass
+
+    try:
+        msg.text.file_id
+        return "Text"
+    except:
+        pass
+        
+    
