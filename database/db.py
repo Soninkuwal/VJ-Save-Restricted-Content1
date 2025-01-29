@@ -83,7 +83,10 @@ class db:
             (user_id, first_name)
         )
         self.conn.commit()
+
+
         
+        if not await db.is_user_exist(message.from_user.id):
     async def is_user_exist(self, user_id:int):
         self.cursor.execute(
             "SELECT user_id FROM users WHERE user_id = ?",
@@ -152,8 +155,5 @@ class db:
     async def remove_delete_word(self, word: str):
       self.cursor.execute("DELETE FROM delete_words WHERE word = ?", (word,))
       self.conn.commit()
-
-        
-if not await db.is_user_exist(message.from_user.id):
 
     
