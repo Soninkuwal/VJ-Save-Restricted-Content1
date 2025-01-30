@@ -43,10 +43,7 @@ class Database:
         user = await self.col.find_one({'id': int(id)})
         return user['session']
 
-db = Database(DB_URI, DB_NAME)
 
-
-class Database:
     def __init__(self, uri=None, db_name=None):
         if uri and db_name: # Check if URI and DB_NAME exists, if not then create a sqlite database, if they do exists then create a mongodb connection
             self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
@@ -189,5 +186,6 @@ if os.getenv("DB_NAME"):
     DB_NAME = os.getenv("DB_NAME")
 else:
     from config import DB_NAME
+
 db = Database(DB_URI, DB_NAME)
 
