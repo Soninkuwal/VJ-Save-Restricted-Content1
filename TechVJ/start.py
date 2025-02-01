@@ -358,10 +358,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     
 
  
-                try:
-                  # API Call
-                except Exception as e:
-                    await client.send_message(message.chat.id, f"Unexpected Error: {e}", reply_to_message_id=message.id)
+             
                 last_request_time = {}
 
                 async def is_spamming(user_id):
