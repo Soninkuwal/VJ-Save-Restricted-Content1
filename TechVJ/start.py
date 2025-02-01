@@ -9,7 +9,14 @@ from database.db import db
 from TechVJ.strings import HELP_TXT
 import logging
 logging.basicConfig(level=logging.ERROR)
+import concurrent.futures
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
+async def fast_download_media(client, message):
+    loop = asyncio.get_event_loop()
+    file = await loop.run_in_executor(executor, client.download_media, message)
+    return file
+    
 
 class batch_temp(object):
     IS_BATCH = {}
@@ -356,18 +363,6 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
     os.remove(file)
     await client.delete_messages(message.chat.id, [smsg.id])
     
-
- 
-             
-                last_request_time = {}
-
-                async def is_spamming(user_id):
-                global last_request_time
-                if user_id in last_request_time and (time.time() - last_request_time[user_id]) < 3:
-                return True
-                last_request_time[user_id] = time.time()
-                return False
-
 
 # get the type of message
 def get_message_type(msg: pyrogram.types.messages_and_media.message.Message):
