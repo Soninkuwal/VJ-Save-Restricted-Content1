@@ -7,6 +7,8 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from config import API_ID, API_HASH, ERROR_MESSAGE, FORWARD_CHANNEL_ID
 from database.db import db
 from TechVJ.strings import HELP_TXT
+import logging
+logging.basicConfig(level=logging.ERROR)
 
 
 class batch_temp(object):
@@ -48,9 +50,11 @@ async def upstatus(client, statusfile, message, chat):
 
 
 # progress writer
-def progress(current, total, message, type):
-    with open(f'{message.id}{type}status.txt', "w") as fileup:
-        fileup.write(f"{current * 100 / total:.1f}%")
+async def progress(current, total, message, type):
+    percent = (current / total) * 100
+    if percent % 10 == 0:  # हर 10% पर अपडेट करें
+        with open(f'{message.id}{type}status.txt', "w") as fileup:
+            fileup.write(f"{percent:.1f}%")
 
 
 # start command
@@ -143,6 +147,8 @@ async def save(client: Client, message: Message):
             else:
                 username = datas[3]
 
+    
+    
                 try:
                     msg = await client.get_messages(username, msgid)
                 except UsernameNotOccupied:
@@ -349,6 +355,21 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
     os.remove(file)
     await client.delete_messages(message.chat.id, [smsg.id])
+    
+
+ 
+                try:
+                  # API Call
+                except Exception as e:
+                    await client.send_message(message.chat.id, f"Unexpected Error: {e}", reply_to_message_id=message.id)
+                last_request_time = {}
+
+                async def is_spamming(user_id):
+                global last_request_time
+                if user_id in last_request_time and (time.time() - last_request_time[user_id]) < 3:
+                return True
+                last_request_time[user_id] = time.time()
+                return False
 
 
 # get the type of message
