@@ -238,7 +238,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -322,7 +322,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -353,7 +353,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -376,7 +376,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -393,7 +393,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -411,7 +411,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -434,7 +434,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
@@ -458,7 +458,7 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
             
             # After editing the message text
-            try:
+            
                 await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
