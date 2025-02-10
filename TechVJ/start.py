@@ -8,7 +8,7 @@ import pyrogram
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied, MessageEmpty
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from config import API_ID, API_HASH, ERROR_MESSAGE
+from config import API_ID, API_HASH, ERROR_MESSAGE, YOUR_CHANNEL_ID
 from database.db import db
 from TechVJ.strings import HELP_TXT
 import logging
@@ -235,8 +235,14 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_message(chat, msg.text, entities=msg.entities,
                                           reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
                 return
+
+
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending text message: {e}")
+                logging.error(f"Error forwarding message: {e}")
+    
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -313,8 +319,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_document(chat, file, thumb=ph_path, caption=caption,
                                             reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML,
                                             progress=progress, progress_args=[message, "up"])
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending document: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -336,8 +349,17 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                          height=msg.video.height, thumb=ph_path, caption=caption,
                                          reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML,
                                          progress=progress, progress_args=[message, "up"])
+
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending video: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -351,8 +373,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             try:
                 await client.send_animation(chat, file, reply_to_message_id=message.id,
                                              parse_mode=enums.ParseMode.HTML)
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending animation: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -361,8 +390,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             try:
                 await client.send_sticker(chat, file, reply_to_message_id=message.id,
                                            parse_mode=enums.ParseMode.HTML)
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending sticker: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -372,8 +408,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_voice(chat, file, caption=caption, caption_entities=msg.caption_entities,
                                          reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML,
                                          progress=progress, progress_args=[message, "up"])
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending voice: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -388,8 +431,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 await client.send_audio(chat, file, thumb=ph_path, caption=caption,
                                          reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML,
                                          progress=progress, progress_args=[message, "up"])
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending audio: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
@@ -405,8 +455,15 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
             try:
                 await client.send_photo(chat, file, caption=caption, reply_to_message_id=message.id,
                                           parse_mode=enums.ParseMode.HTML)
+
+            
+            # After editing the message text
+            try:
+                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
-                logging.error(f"Error sending photo: {e}")
+                logging.error(f"Error forwarding message: {e}")
+
+                
                 if ERROR_MESSAGE == True:
                     await client.send_message(message.chat.id, f"Error: {e}",
                                               reply_to_message_id=message.id, parse_mode=enums.ParseMode.HTML)
