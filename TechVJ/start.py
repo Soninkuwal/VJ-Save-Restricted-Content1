@@ -8,7 +8,7 @@ import pyrogram
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, InputUserDeactivated, UserAlreadyParticipant, InviteHashExpired, UsernameNotOccupied, MessageEmpty
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from config import API_ID, API_HASH, ERROR_MESSAGE, YOUR_CHANNEL_ID
+from config import API_ID, API_HASH, ERROR_MESSAGE, FORWARD_CHANNEL_ID
 from database.db import db
 from TechVJ.strings import HELP_TXT
 import logging
@@ -237,9 +237,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                 return
 
 
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
     
@@ -321,9 +320,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                             progress=progress, progress_args=[message, "up"])
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -352,9 +350,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
 
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -375,9 +372,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                              parse_mode=enums.ParseMode.HTML)
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -392,9 +388,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                            parse_mode=enums.ParseMode.HTML)
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -410,9 +405,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                          progress=progress, progress_args=[message, "up"])
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -433,9 +427,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                          progress=progress, progress_args=[message, "up"])
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
@@ -457,9 +450,8 @@ async def handle_private(client: Client, acc, message: Message, chatid: int, msg
                                           parse_mode=enums.ParseMode.HTML)
 
             
-            # After editing the message text
-            
-                await client.forward_messages(chat_id=YOUR_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
+            # forward custom channel ID 
+                await client.forward_messages(FORWARD_CHANNEL_ID, from_chat_id=chat, message_ids=message.id)
             except Exception as e:
                 logging.error(f"Error forwarding message: {e}")
 
