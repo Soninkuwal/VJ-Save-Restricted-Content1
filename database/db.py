@@ -9,16 +9,15 @@ class Database:
         self._create_table()
         
     
-    def _create_table(self):
-        self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            first_name TEXT,
-            session_string TEXT,
-            custom_forward_channel INTEGER
-        )
-        """)
-        self.conn.commit()
+    #def _create_table(self):
+        #self.cursor.execute("""
+        #CREATE TABLE IF NOT EXISTS users (
+            #user_id INTEGER PRIMARY KEY,
+            #first_name TEXT,
+            #session_string TEXT,
+            #custom_forward_channel INTEGER)
+        #""")
+        #self.conn.commit()
 
     
     def new_user(self, id, name):
