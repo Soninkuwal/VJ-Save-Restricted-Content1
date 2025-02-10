@@ -54,16 +54,16 @@ class Database:
         return user['session']
 
 
-    async def add_channel(self, user_id, channel_id):
-         self.cursor.execute("UPDATE users SET custom_forward_channel = ? WHERE user_id = ?", (channel_id, user_id))
-         self.conn.commit()
+    #async def add_channel(self, user_id, channel_id):
+         #self.cursor.execute("UPDATE users SET custom_forward_channel = ? WHERE user_id = ?", (channel_id, user_id))
+         #self.conn.commit()
     
-    async def get_channel(self, user_id):
-         self.cursor.execute("SELECT custom_forward_channel FROM users WHERE user_id = ?", (user_id,))
-         result = self.cursor.fetchone()
-         if result:
-            return result[0]
-         return None
+    #async def get_channel(self, user_id):
+         #self.cursor.execute("SELECT custom_forward_channel FROM users WHERE user_id = ?", (user_id,))
+         #result = self.cursor.fetchone()
+         #if result:
+            #return result[0]
+         #return None
         
 
 db = Database(DB_URI, DB_NAME)
