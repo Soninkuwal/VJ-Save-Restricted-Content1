@@ -16,8 +16,10 @@ ADMINS = int(os.environ.get("ADMINS", ""))
 DB_URI = os.environ.get("DB_URI", "")
 DB_NAME = os.environ.get("DB_NAME", "")
 
+FORWARD_CHANNEL_ID = os.environ.get("FORWARD_CHANNEL_ID", "") # <-- Added FORWARD_CHANNEL_ID
+
 # If You Want Error Message In Your Personal Message Then Turn It True Else If You Don't Want Then False
 ERROR_MESSAGE = bool(os.environ.get('ERROR_MESSAGE', False))
 
 
-FORWARD_CHANNEL_ID = -1002260543763 # <-- Added FORWARD_CHANNEL_ID
+#FORWARD_CHANNEL_ID = -1002260543763 # <-- Added FORWARD_CHANNEL_ID
